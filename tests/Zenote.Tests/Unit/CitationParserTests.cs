@@ -48,6 +48,30 @@ public class CitationParserTests
     }
 
     [Fact]
+    public void Expands_a_range_of_sources()
+    {
+        var (text, citations) = CitationParser.Parse("Fact [1-2].", Sources);
+
+        text.ShouldBe("Fact [1][2].");
+        citations.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public void A_range_past_the_last_source_keeps_the_real_ones()
+    {
+        var (text, citations) = CitationParser.Parse("Fact [1-6].", Sources);
+
+        text.ShouldBe("Fact [1][2].");
+        citations.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public void Removes_commas_between_markers()
+    {
+        CitationParser.Parse("Fact.\n\n[1], [2]", Sources).Text.ShouldBe("Fact.\n\n[1][2]");
+    }
+
+    [Fact]
     public void Text_without_markers_has_no_citations()
     {
         var (text, citations) = CitationParser.Parse("No citations here.", Sources);

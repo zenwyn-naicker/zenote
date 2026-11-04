@@ -32,7 +32,7 @@ public class AnswerEvalTests
         var golden = await EvalCorpus.LoadQuestionsAsync(ct);
 
         var retriever = new Retriever(embedder, workspace.Vectors, workspace.Documents, Options.Create(new RetrievalOptions()));
-        var service = new RagAnswerService(retriever, ServiceCollectionExtensions.CreateChatClient(url, models));
+        var service = new RagAnswerService(retriever, ServiceCollectionExtensions.CreateChatClient(url, models, models.ChatModel));
 
         await AskAsync(service, notebook.Id, "Warm up.", ct);
 

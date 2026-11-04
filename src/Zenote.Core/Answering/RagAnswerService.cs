@@ -51,6 +51,9 @@ public sealed class RagAnswerService(IRetriever retriever, IChatClient chat) : I
             }
         }
 
+        // Some clients end the stream quietly when cancelled, which mustn't look like a finished answer.
+        ct.ThrowIfCancellationRequested();
+
         var answer = text.ToString().Trim();
 
         if (answer.Length == 0 || answer.StartsWith(PromptBuilder.NotFoundSignal, StringComparison.Ordinal))

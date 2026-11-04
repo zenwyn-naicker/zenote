@@ -1,73 +1,144 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Zenote.App.ViewModels"
+             xmlns:controls="using:Zenote.App.Controls"
              x:Class="Zenote.App.Views.ChatView"
              x:DataType="vm:ChatViewModel">
   <DockPanel>
-    <Border DockPanel.Dock="Bottom" Padding="20,12" BorderBrush="#E7E5E4" BorderThickness="0,1,0,0">
-      <DockPanel>
-        <Panel DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Bottom">
-          <Button Content="Send" Command="{Binding SendCommand}" IsVisible="{Binding IsIdle}" />
-          <Button Content="Stop" Command="{Binding StopCommand}" IsVisible="{Binding IsAnswering}" />
-        </Panel>
-        <TextBox Text="{Binding Input}" PlaceholderText="Ask about your sources…" AcceptsReturn="False"
-                 TextWrapping="Wrap" MaxHeight="120">
-          <TextBox.KeyBindings>
-            <KeyBinding Gesture="Enter" Command="{Binding SendCommand}" />
-          </TextBox.KeyBindings>
-        </TextBox>
-      </DockPanel>
-    </Border>
+    <DockPanel DockPanel.Dock="Top" Margin="20,12,12,8">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+        <Button x:Name="HistoryButton" Classes="icon" ToolTip.Tip="Chat history" IsVisible="{Binding HasConversations}" IsEnabled="{Binding IsIdle}">
+          <PathIcon Data="{StaticResource IconHistory}" />
+          <Button.Flyout>
+            <Flyout Placement="BottomEdgeAlignedRight">
+              <ListBox x:Name="HistoryList" ItemsSource="{Binding Conversations}" SelectedItem="{Binding SelectedConversation}" Width="320" MaxHeight="360">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ConversationItemViewModel">
+                    <Panel>
+                      <DockPanel IsVisible="{Binding !IsRenaming}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" Margin="6,-4,-4,-4">
+                          <Button Classes="icon small" Command="{Binding StartRenameCommand}" ToolTip.Tip="Rename chat">
+                            <PathIcon Data="{StaticResource IconEdit}" />
+                          </Button>
+                          <Button Classes="icon small" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete chat">
+                            <PathIcon Data="{StaticResource IconDelete}" />
+                          </Button>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Title}" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                      </DockPanel>
+                      <TextBox IsVisible="{Binding IsRenaming}" Classes="field" Text="{Binding EditTitle}" FontSize="13">
+                        <TextBox.KeyBindings>
+                          <KeyBinding Gesture="Enter" Command="{Binding SaveRenameCommand}" />
+                        </TextBox.KeyBindings>
+                      </TextBox>
+                    </Panel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button Classes="icon" Command="{Binding NewChatCommand}" IsEnabled="{Binding IsIdle}" ToolTip.Tip="New chat">
+          <PathIcon Data="{StaticResource IconAdd}" />
+        </Button>
+      </StackPanel>
+      <TextBlock Classes="title" Text="Chat" VerticalAlignment="Center" />
+    </DockPanel>
 
-    <ScrollViewer x:Name="Scroller" Padding="20,12">
-      <ItemsControl ItemsSource="{Binding Messages}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:MessageViewModel">
-            <Panel Margin="0,6">
-              <Border IsVisible="{Binding IsUser}" HorizontalAlignment="Right" MaxWidth="520"
-                      Background="#F5F5F4" CornerRadius="12" Padding="12,8">
-                <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" />
-              </Border>
+    <StackPanel DockPanel.Dock="Bottom" Margin="24,8,24,12" Spacing="8" MaxWidth="760">
+      <Border CornerRadius="24" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
+              Background="{StaticResource SurfaceBrush}" Padding="20,7,7,7">
+        <DockPanel>
+          <Panel DockPanel.Dock="Right" VerticalAlignment="Bottom">
+            <Button Classes="send" Command="{Binding SendCommand}" IsVisible="{Binding IsIdle}" ToolTip.Tip="Send">
+              <PathIcon Data="{StaticResource IconSend}" />
+            </Button>
+            <Button Classes="send" Command="{Binding StopCommand}" IsVisible="{Binding IsAnswering}" ToolTip.Tip="Stop">
+              <PathIcon Classes="stop" Data="{StaticResource IconStop}" />
+            </Button>
+          </Panel>
+          <TextBlock DockPanel.Dock="Right" Text="{Binding SourcesLabel}" FontSize="12" Foreground="{StaticResource FaintBrush}"
+                     VerticalAlignment="Center" Margin="12,0" />
+          <TextBox Classes="bare" Text="{Binding Input}" PlaceholderText="{Binding InputHint}" AcceptsReturn="False"
+                   TextWrapping="Wrap" MaxHeight="120" FontSize="14">
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Enter" Command="{Binding SendCommand}" />
+            </TextBox.KeyBindings>
+          </TextBox>
+        </DockPanel>
+      </Border>
+      <TextBlock Text="Zenote can be inaccurate, so check important answers against their sources." FontSize="11"
+                 Foreground="{StaticResource FaintBrush}" HorizontalAlignment="Center" />
+    </StackPanel>
 
-              <StackPanel IsVisible="{Binding IsAssistant}" Spacing="4" MaxWidth="640" HorizontalAlignment="Left">
-                <TextBlock IsVisible="{Binding IsThinking}" Text="Reading your sources…" FontSize="13" Foreground="#78716C" />
-                <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21"
-                                     Classes.muted="{Binding IsNotFound}" Classes.failed="{Binding IsFailed}">
-                  <SelectableTextBlock.Styles>
-                    <Style Selector="SelectableTextBlock.muted">
-                      <Setter Property="Foreground" Value="#78716C" />
-                    </Style>
-                    <Style Selector="SelectableTextBlock.failed">
-                      <Setter Property="Foreground" Value="#B91C1C" />
-                    </Style>
-                  </SelectableTextBlock.Styles>
-                </SelectableTextBlock>
+    <Panel>
+      <StackPanel IsVisible="{Binding HasNoMessages}" VerticalAlignment="Center" MaxWidth="560" Margin="32">
+        <StackPanel IsVisible="{Binding HasSources}" Spacing="8">
+          <TextBlock Text="{Binding NotebookTitle}" FontSize="30" FontWeight="Medium" LetterSpacing="-0.4" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding SourcesLabel}" Classes="muted" />
+          <TextBlock Text="Ask a specific question. Answers come only from your sources and link to the page they came from."
+                     FontSize="14" LineHeight="22" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,12,0,0" />
+        </StackPanel>
 
-                <TextBlock IsVisible="{Binding IsUnverified}" FontSize="12" Foreground="#B45309"
-                           Text="Unverified: this answer has no citations, so check it against your sources." TextWrapping="Wrap" />
+        <StackPanel IsVisible="{Binding HasNoSources}" Spacing="10">
+          <PathIcon Data="{StaticResource IconDocument}" Width="40" Height="40" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" />
+          <TextBlock Text="Add a source to get started" FontSize="20" FontWeight="Medium" HorizontalAlignment="Center" />
+          <TextBlock Text="Your PDFs stay on this Mac." Classes="muted" HorizontalAlignment="Center" />
+        </StackPanel>
+      </StackPanel>
 
-                <StackPanel IsVisible="{Binding HasChips}" Spacing="4" Margin="0,4,0,0">
-                  <TextBlock Text="{Binding ChipsHeading}" FontSize="11" Foreground="#78716C" />
-                  <ItemsControl ItemsSource="{Binding Chips}">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate>
-                        <WrapPanel />
-                      </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate x:DataType="vm:CitationChipViewModel">
-                        <Button Content="{Binding Label}" Command="{Binding OpenCommand}" ToolTip.Tip="Show this page"
-                                FontSize="12" Padding="10,3" Margin="0,0,6,6" CornerRadius="12"
-                                Background="#EEF2FF" Foreground="#3730A3" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
+      <ScrollViewer x:Name="Scroller" IsVisible="{Binding !HasNoMessages}">
+        <ItemsControl ItemsSource="{Binding Messages}" MaxWidth="760" Margin="24,4">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:MessageViewModel">
+              <Panel Margin="0,10">
+                <Border IsVisible="{Binding IsUser}" HorizontalAlignment="Right" MaxWidth="560"
+                        Background="{StaticResource UserBubbleBrush}" CornerRadius="18,18,4,18" Padding="16,10">
+                  <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
+                </Border>
+
+                <StackPanel IsVisible="{Binding IsAssistant}" Spacing="8" HorizontalAlignment="Left">
+                  <TextBlock IsVisible="{Binding IsThinking}" Text="Reading your sources…" Classes="muted" />
+                  <controls:AnswerText Message="{Binding}" TextWrapping="Wrap" FontSize="14" LineHeight="23"
+                                       Classes.notFound="{Binding IsNotFound}" Classes.failed="{Binding IsFailed}">
+                    <controls:AnswerText.Styles>
+                      <Style Selector="SelectableTextBlock.notFound">
+                        <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                      </Style>
+                      <Style Selector="SelectableTextBlock.failed">
+                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                      </Style>
+                    </controls:AnswerText.Styles>
+                  </controls:AnswerText>
+
+                  <TextBlock IsVisible="{Binding IsStopped}" Text="Stopped" FontSize="12" Foreground="{StaticResource FaintBrush}" />
+
+                  <TextBlock IsVisible="{Binding IsUnverified}" FontSize="12" Foreground="{StaticResource WarningBrush}"
+                             Text="Unverified: this answer has no citations, so check it against your sources." TextWrapping="Wrap" />
+
+                  <StackPanel IsVisible="{Binding HasChips}" Spacing="6">
+                    <TextBlock Text="{Binding ChipsHeading}" FontSize="12" Foreground="{StaticResource FaintBrush}" />
+                    <ItemsControl ItemsSource="{Binding Chips}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CitationChipViewModel">
+                          <Button Classes="chip" Command="{Binding OpenCommand}" ToolTip.Tip="{Binding Label}">
+                            <TextBlock Text="{Binding Label}" MaxWidth="240" TextTrimming="CharacterEllipsis" />
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
                 </StackPanel>
-              </StackPanel>
-            </Panel>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
+              </Panel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Panel>
   </DockPanel>
 </UserControl>

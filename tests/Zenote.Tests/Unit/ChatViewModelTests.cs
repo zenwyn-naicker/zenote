@@ -25,7 +25,7 @@ public class ChatViewModelTests
         _retriever.RetrieveAsync(Notebook, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new RetrievalResult([chunk], true));
 
-        return new ChatViewModel(Notebook, new RagAnswerService(_retriever, chat), _conversations);
+        return new ChatViewModel(Notebook, new RagAnswerService(_retriever, chat), _conversations) { SourceCount = 1 };
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class ChatViewModelTests
         var answers = Substitute.For<IRagAnswerService>();
         answers.AskAsync(Notebook, Arg.Any<string>(), Arg.Any<IReadOnlyList<ChatTurn>>(), Arg.Any<CancellationToken>())
             .Returns(_ => Throwing());
-        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { Input = "Question" };
+        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { SourceCount = 1, Input = "Question" };
 
         await viewModel.SendCommand.ExecuteAsync(null);
 
@@ -177,6 +177,34 @@ public class ChatViewModelTests
         viewModel.IsAnswering.ShouldBeFalse();
         viewModel.Messages[1].IsPending.ShouldBeFalse();
         viewModel.Messages[1].Text.ShouldBe("Partial answer");
+        viewModel.Messages[1].IsStopped.ShouldBeTrue();
+        viewModel.Messages[1].IsUnverified.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task A_client_that_ends_quietly_on_cancel_still_counts_as_stopped()
+    {
+        var chat = new FakeChatClient("Partial answer", "more") { EndQuietlyOnCancel = true, HangAfterFirstToken = true };
+        var viewModel = CreateViewModel(chat);
+        viewModel.Input = "Question";
+
+        var sending = viewModel.SendCommand.ExecuteAsync(null);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+        viewModel.StopCommand.Execute(null);
+        await sending;
+
+        viewModel.Messages[1].IsStopped.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Questions_need_at_least_one_source()
+    {
+        var viewModel = CreateViewModel(new FakeChatClient());
+        viewModel.SourceCount = 0;
+        viewModel.Input = "Question";
+
+        viewModel.SendCommand.CanExecute(null).ShouldBeFalse();
+        viewModel.InputHint.ShouldBe("Add a source to get started");
     }
 
     [Fact]
@@ -199,7 +227,7 @@ public class ChatViewModelTests
         var answers = Substitute.For<IRagAnswerService>();
         answers.AskAsync(Notebook, Arg.Any<string>(), Arg.Any<IReadOnlyList<ChatTurn>>(), Arg.Any<CancellationToken>())
             .Returns(_ => Throwing());
-        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { Input = "Question" };
+        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { SourceCount = 1, Input = "Question" };
 
         await viewModel.SendCommand.ExecuteAsync(null);
 

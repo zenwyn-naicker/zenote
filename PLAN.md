@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 9)
+# Zenote — Project Plan (rev 11)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,38 @@
 
 ## Status
 
-M0 to M4 are merged and tagged. **M5 and M6 are in review.** Next: M7.
+M0 to M6 are merged and tagged. **M7 is in review.** Next: your testing and feedback.
+
+## What changed in rev 11 (from hands-on testing)
+
+- **D2 settled: keep `llama3.2` as the default.** Results on the 34-question set:
+
+  | Model | Correct fact | Right page | Declined | First word | Download |
+  |---|---|---|---|---|---|
+  | `llama3.2` | 96% | 92% | 8/8 | 2.2 s | 2.0 GB |
+  | `qwen3.5:4b` | 96% | 96% | 8/8 | 2.7 s | 4.0 GB |
+  | `gemma4:e4b` | 96% | 96% | 8/8 | 3.4 s | 9.5 GB |
+  | `phi4-mini` | 96% | 81% | 8/8 | 2.9 s | 2.5 GB |
+
+- **Settings has a purpose now:** live model switching, Ollama status and address, and where your data lives.
+  `SwitchableChatClient` changes model without a restart.
+- The cited passage box was removed, because the rendered page sits right below it. It only shows when the source has been deleted.
+- `[1-6]` ranges and `[1], [2]` lists now parse properly. Stopped answers are labelled "Stopped".
+- Removing a source asks first. In narrow windows the sources make way for the page viewer. Questions need at least one source.
+- **Lesson:** closing a flyout while its `ListBox` is updating its selection crashes the app, so `ChatView` only closes the menu after a
+  real click, on a posted callback. `ChatHistoryUiTests` cover the menu's behaviour, but they did not reproduce that crash, so a manual delete test still matters.
+
+## What changed in rev 10 (M7 and the redesign)
+
+- **The UI was redesigned to follow NotebookLM's layout**, using Zenote's own name and logo: a card grid with a "Create new" tile,
+  rounded panels on a soft background, a pill input and inline numbered citations.
+- Design tokens, icons and button styles live in `Theme.axaml`.
+- **Saved chats moved** from a left-hand list to a history menu in the chat header, so the left panel holds only sources.
+- **Create new** opens an "Untitled notebook" straight away, and the title is edited in place.
+- **The status bar is gone.** A banner appears only when something needs attention.
+- The source viewer sits where NotebookLM has its Studio panel, and only opens when needed.
+- Settings changes only the Ollama address and chat model. Embedding settings stay in `appsettings.json`, because they need a matching vector size.
+- `scripts/package-macos.sh` builds an ad-hoc signed `Zenote.app`. The v1.0 release waits until you've tested it.
 
 ## What changed in rev 9 (learned in M5 and M6)
 

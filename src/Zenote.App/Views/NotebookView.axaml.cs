@@ -7,11 +7,33 @@ namespace Zenote.App.Views;
 
 public partial class NotebookView : UserControl
 {
+    private const double NarrowWidth = 1120;
+
     public NotebookView()
     {
         InitializeComponent();
         AddHandler(DragDrop.DropEvent, OnDrop);
+
+        SizeChanged += (_, e) =>
+        {
+            if (DataContext is NotebookViewModel viewModel)
+            {
+                viewModel.IsNarrow = e.NewSize.Width < NarrowWidth;
+            }
+        };
+
+        TitleBox.LostFocus += async (_, _) => await SaveTitleAsync();
+        TitleBox.KeyDown += async (_, e) =>
+        {
+            if (e.Key == Key.Enter)
+            {
+                await SaveTitleAsync();
+                Focus();
+            }
+        };
     }
+
+    private Task SaveTitleAsync() => DataContext is NotebookViewModel viewModel ? viewModel.SaveTitleAsync() : Task.CompletedTask;
 
     private async void OnDrop(object? sender, DragEventArgs e)
     {

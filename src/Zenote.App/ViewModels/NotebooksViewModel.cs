@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using CommunityToolkit.Mvvm.Input;
 using Zenote.Core.Abstractions;
 using Zenote.Core.Domain;
@@ -14,12 +16,12 @@ public sealed partial class NotebooksViewModel(INotebookRepository notebooks, ID
 
     public ObservableCollection<NotebookCardViewModel> Cards { get; } = [];
 
+    /// The "create" tile followed by the notebooks, so they flow together in one grid.
+    public ObservableCollection<object> Tiles { get; } = [];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
     public partial bool IsLoaded { get; set; }
-
-    [ObservableProperty]
-    public partial string NewTitle { get; set; } = "";
 
     public bool IsEmpty => IsLoaded && Cards.Count == 0;
 
@@ -33,6 +35,13 @@ public sealed partial class NotebooksViewModel(INotebookRepository notebooks, ID
             Cards.Add(new NotebookCardViewModel(summary, this));
         }
 
+        Tiles.Clear();
+        Tiles.Add(new CreateNotebookTile(CreateCommand));
+        foreach (var card in Cards)
+        {
+            Tiles.Add(card);
+        }
+
         IsLoaded = true;
         OnPropertyChanged(nameof(IsEmpty));
     }
@@ -40,10 +49,7 @@ public sealed partial class NotebooksViewModel(INotebookRepository notebooks, ID
     [RelayCommand]
     private async Task CreateAsync()
     {
-        var title = string.IsNullOrWhiteSpace(NewTitle) ? DefaultTitle : NewTitle.Trim();
-        var notebook = await notebooks.CreateAsync(title, CancellationToken.None);
-
-        NewTitle = "";
+        var notebook = await notebooks.CreateAsync(DefaultTitle, CancellationToken.None);
         await OpenAsync(notebook);
     }
 
@@ -62,12 +68,24 @@ public sealed partial class NotebooksViewModel(INotebookRepository notebooks, ID
     }
 }
 
+public sealed record CreateNotebookTile(System.Windows.Input.ICommand Create);
+
 public sealed partial class NotebookCardViewModel(NotebookSummary summary, NotebooksViewModel parent) : ObservableObject
 {
+    private static readonly string[] Tints = ["#E8F0FE", "#FCE8E6", "#E6F4EA", "#FEF7E0", "#F3E8FD", "#E4F7FB"];
+    private static readonly string[] Emojis = ["📘", "🌿", "☕️", "💡", "🗂️", "🧭", "🪴", "📎"];
+
+    private readonly int _seed = summary.Notebook.Id.GetHashCode() & int.MaxValue;
+
     public Notebook Notebook { get; } = summary.Notebook;
     public string Title { get; } = summary.Notebook.Title;
-    public string Summary { get; } = summary.SourceCount == 1 ? "1 source" : $"{summary.SourceCount} sources";
+    public string Summary { get; } = $"{summary.Notebook.UpdatedAt.ToLocalTime():d MMM yyyy} · " +
+        (summary.SourceCount == 1 ? "1 source" : $"{summary.SourceCount} sources");
     public string DeletePrompt { get; } = $"Delete \"{summary.Notebook.Title}\" and its sources? This can't be undone.";
+
+    public string Emoji => Emojis[_seed % Emojis.Length];
+
+    public IBrush Tint => new ImmutableSolidColorBrush(Color.Parse(Tints[_seed % Tints.Length]));
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle))]

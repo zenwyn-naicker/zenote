@@ -27,7 +27,9 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(options));
         services.AddSingleton<IOllamaApiClient>(_ => new OllamaApiClient(url));
-        services.AddSingleton(_ => CreateChatClient(url, options));
+        services.AddSingleton(_ => new SwitchableChatClient(model => CreateChatClient(url, options, model), options.ChatModel));
+        services.AddSingleton<IChatClient>(provider => provider.GetRequiredService<SwitchableChatClient>());
+        services.AddSingleton<IChatModels, OllamaChatModels>();
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(url, options.EmbeddingModel));
         services.AddSingleton<IAiHealthCheck, OllamaHealthCheck>();
         services.AddSingleton(paths);
@@ -56,8 +58,8 @@ public static class ServiceCollectionExtensions
 
     // Ollama silently cuts off prompts longer than its context window, so it's always set explicitly.
     // Keeping this here means Core never needs to know about Ollama.
-    public static IChatClient CreateChatClient(Uri url, ModelOptions options) =>
-        new ChatClientBuilder(new OllamaApiClient(url, options.ChatModel))
+    public static IChatClient CreateChatClient(Uri url, ModelOptions options, string model) =>
+        new ChatClientBuilder(new OllamaApiClient(url, model))
             .ConfigureOptions(chat => chat
                 .AddOllamaOption(OllamaOption.NumCtx, options.ChatContextTokens)
                 .AddOllamaOption(OllamaOption.Think, false))

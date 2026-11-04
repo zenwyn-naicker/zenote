@@ -13,6 +13,9 @@ public sealed class FakeChatClient(params string[] tokens) : IChatClient
     /// When set, the stream pauses here after the first token until cancelled.
     public bool HangAfterFirstToken { get; set; }
 
+    /// Ends the stream instead of throwing when cancelled, as some clients do.
+    public bool EndQuietlyOnCancel { get; set; }
+
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -29,6 +32,12 @@ public sealed class FakeChatClient(params string[] tokens) : IChatClient
 
             if (HangAfterFirstToken)
             {
+                if (EndQuietlyOnCancel)
+                {
+                    await Task.WhenAny(Task.Delay(Timeout.Infinite, cancellationToken));
+                    yield break;
+                }
+
                 await Task.Delay(Timeout.Infinite, cancellationToken);
             }
         }

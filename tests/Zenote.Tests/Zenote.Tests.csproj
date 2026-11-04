@@ -11,6 +11,8 @@
     <ProjectReference Include="..\..\src\Zenote.Infrastructure\Zenote.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="Avalonia.Skia" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Numerics.Tensors" />

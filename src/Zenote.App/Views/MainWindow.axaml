@@ -5,8 +5,9 @@
         x:Class="Zenote.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Zenote"
-        Width="1000" Height="680" MinWidth="640" MinHeight="420"
-        Background="White">
+        Icon="avares://Zenote/Assets/icon.png"
+        Width="1280" Height="820" MinWidth="880" MinHeight="560"
+        Background="{StaticResource PageBrush}">
   <Window.DataTemplates>
     <DataTemplate DataType="vm:NotebooksViewModel">
       <views:NotebooksView />
@@ -17,28 +18,81 @@
   </Window.DataTemplates>
 
   <DockPanel>
-    <Border DockPanel.Dock="Bottom" Background="#F5F5F4" BorderBrush="#E7E5E4" BorderThickness="0,1,0,0" Padding="12,6">
+    <Border DockPanel.Dock="Top" IsVisible="{Binding HasProblems}" Background="#FEF7E0" Padding="20,8">
       <DockPanel>
-        <Button DockPanel.Dock="Right" Content="Check again" Command="{Binding RefreshCommand}" FontSize="12" Padding="8,2" />
-        <ItemsControl ItemsSource="{Binding Checks}" VerticalAlignment="Center">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <WrapPanel />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="vm:CheckItemViewModel">
-              <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,16,0" ToolTip.Tip="{Binding Detail}">
-                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="#166534" IsVisible="{Binding Ok}" />
-                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="#B91C1C" IsVisible="{Binding Failed}" />
-                <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="#78716C" />
-              </StackPanel>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Button DockPanel.Dock="Right" Classes="pill" Height="30" Content="Check again" Command="{Binding RefreshCommand}" />
+        <TextBlock Text="{Binding ProblemText}" FontSize="13" Foreground="#7A4F01" VerticalAlignment="Center"
+                   TextWrapping="Wrap" Margin="0,0,12,0" />
       </DockPanel>
     </Border>
 
-    <ContentControl Content="{Binding CurrentPage}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+    <Panel>
+      <ContentControl Content="{Binding CurrentPage}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+
+      <Button Classes="icon" Command="{Binding Settings.OpenCommand}" ToolTip.Tip="Settings"
+              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,16,0">
+        <PathIcon Data="{StaticResource IconSettings}" />
+      </Button>
+
+      <Border IsVisible="{Binding Settings.IsOpen}" Background="#59000000">
+        <Border DataContext="{Binding Settings}" x:DataType="vm:SettingsViewModel"
+                Background="{StaticResource SurfaceBrush}" CornerRadius="20" Padding="28,22,28,20" Width="500"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+          <StackPanel Spacing="16">
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Classes="icon" Command="{Binding CloseCommand}" ToolTip.Tip="Close settings" Margin="0,0,-8,0">
+                <PathIcon Data="{StaticResource IconClose}" />
+              </Button>
+              <TextBlock Text="Settings" FontSize="20" FontWeight="Medium" VerticalAlignment="Center" />
+            </DockPanel>
+
+            <DockPanel>
+              <ComboBox DockPanel.Dock="Right" Classes="field" ItemsSource="{Binding ModelPicker.Models}" SelectedItem="{Binding ModelPicker.Selected}"
+                        IsVisible="{Binding IsConnected}" VerticalAlignment="Center" ToolTip.Tip="Chat model" />
+              <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Chat model" FontSize="14" FontWeight="Medium" />
+                <TextBlock Text="Writes your answers. Changes apply to your next question." FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DockPanel>
+
+            <Border Height="1" Background="{StaticResource LineBrush}" />
+
+            <StackPanel Spacing="10">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="pill" Height="32" Content="Change address" Command="{Binding ToggleAddressCommand}" VerticalAlignment="Center" />
+                <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
+                  <TextBlock Text="Ollama" FontSize="14" FontWeight="Medium" />
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse Width="8" Height="8" Fill="#1E8E3E" IsVisible="{Binding IsConnected}" VerticalAlignment="Center" />
+                    <Ellipse Width="8" Height="8" Fill="{StaticResource DangerBrush}" IsVisible="{Binding !IsConnected}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ConnectionText}" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                  </StackPanel>
+                </StackPanel>
+              </DockPanel>
+
+              <DockPanel IsVisible="{Binding IsEditingAddress}">
+                <Button DockPanel.Dock="Right" Classes="pill primary" Height="36" Content="Save" Command="{Binding SaveCommand}" Margin="8,0,0,0" />
+                <TextBox Classes="field" Text="{Binding OllamaUrl}" />
+              </DockPanel>
+
+              <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource WarningBrush}"
+                         IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </StackPanel>
+
+            <Border Height="1" Background="{StaticResource LineBrush}" />
+
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Classes="pill" Height="32" Content="Show in Finder" Command="{Binding ShowDataFolderCommand}" VerticalAlignment="Center" />
+              <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Your data" FontSize="14" FontWeight="Medium" />
+                <TextBlock Text="Notebooks and PDFs stay on this Mac." FontSize="12" Foreground="{StaticResource MutedBrush}" />
+              </StackPanel>
+            </DockPanel>
+
+            <TextBlock Text="{Binding AboutText}" FontSize="11" Foreground="{StaticResource FaintBrush}" Margin="0,4,0,0" />
+          </StackPanel>
+        </Border>
+      </Border>
+    </Panel>
   </DockPanel>
 </Window>

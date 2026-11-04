@@ -37,11 +37,14 @@ public static class Program
             .WithInterFont()
             .LogToTrace();
 
+    private static string UserSettingsPath => Path.Combine(AppPaths.Default.Root, "settings.json");
+
     private static ServiceProvider BuildServices()
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile(UserSettingsPath, optional: true)
             .Build();
 
         var models = configuration.GetSection("Models").Get<ModelOptions>() ?? new ModelOptions();
@@ -49,12 +52,15 @@ public static class Program
         return new ServiceCollection()
             .AddZenoteInfrastructure(models, AppPaths.Default)
             .AddZenoteViewModels()
+            .AddSingleton(new UserSettings(UserSettingsPath))
             .BuildServiceProvider();
     }
 
     public static IServiceCollection AddZenoteViewModels(this IServiceCollection services) => services
         .AddSingleton<IFilePicker, AvaloniaFilePicker>()
         .AddSingleton<NotebooksViewModel>()
+        .AddSingleton<SettingsViewModel>()
+        .AddSingleton<ModelPickerViewModel>()
         .AddTransient<MainWindowViewModel>()
         .AddSingleton<Func<Notebook, NotebookViewModel>>(provider => notebook => new NotebookViewModel(
             notebook,
@@ -64,7 +70,8 @@ public static class Program
             provider.GetRequiredService<IIndexingQueue>(),
             provider.GetRequiredService<IRagAnswerService>(),
             provider.GetRequiredService<IPageRenderer>(),
-            provider.GetRequiredService<IConversationRepository>()));
+            provider.GetRequiredService<IConversationRepository>(),
+            provider.GetRequiredService<INotebookRepository>()));
 
     // Prints the same checks as the status bar, so a published build can be tested without the UI.
     private static int RunSelfCheck()

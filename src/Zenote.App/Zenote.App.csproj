@@ -18,6 +18,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Include="..\..\assets\icon.png" Link="Assets\icon.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
