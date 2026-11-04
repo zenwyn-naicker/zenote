@@ -68,7 +68,7 @@
         </DockPanel>
       </Border>
       <TextBlock Text="Zenote can be inaccurate, so check important answers against their sources." FontSize="11"
-                 Foreground="{DynamicResource FaintBrush}" HorizontalAlignment="Center" />
+                 Foreground="{DynamicResource FaintBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
     </StackPanel>
 
     <Panel>
