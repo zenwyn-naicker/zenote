@@ -2,9 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Zenote.App.ViewModels"
              xmlns:views="using:Zenote.App.Views"
+             xmlns:converters="using:Zenote.App.Converters"
              x:Class="Zenote.App.Views.NotebookView"
              x:DataType="vm:NotebookViewModel"
              DragDrop.AllowDrop="True">
+  <UserControl.Resources>
+    <converters:BytesToBitmapConverter x:Key="BytesToBitmap" />
+  </UserControl.Resources>
+
   <DockPanel>
     <Border DockPanel.Dock="Top" Padding="16,12" BorderBrush="#E7E5E4" BorderThickness="0,0,0,1">
       <StackPanel Orientation="Horizontal" Spacing="12">
@@ -57,24 +62,36 @@
 
       <views:ChatView Grid.Column="1" DataContext="{Binding Chat}" />
 
-      <Border Grid.Column="2" Width="380" IsVisible="{Binding IsReaderOpen}" BorderBrush="#E7E5E4" BorderThickness="1,0,0,0">
-        <DockPanel>
+      <Border Grid.Column="2" Width="400" IsVisible="{Binding Panel.IsOpen}" BorderBrush="#E7E5E4" BorderThickness="1,0,0,0">
+        <DockPanel DataContext="{Binding Panel}" x:DataType="vm:SourcePanelViewModel">
           <DockPanel DockPanel.Dock="Top" Margin="16,10">
-            <Button DockPanel.Dock="Right" Content="✕" Command="{Binding CloseReaderCommand}" ToolTip.Tip="Close"
+            <Button DockPanel.Dock="Right" Content="✕" Command="{Binding CloseCommand}" ToolTip.Tip="Close"
                     FontSize="11" Padding="6,1" Background="Transparent" />
-            <TextBlock Text="{Binding SelectedSource.FileName, FallbackValue=''}" FontWeight="SemiBold" FontSize="13"
+            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13"
                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
           </DockPanel>
-          <ListBox ItemsSource="{Binding Pages}" Background="White" Padding="8,0">
-            <ListBox.ItemTemplate>
-              <DataTemplate x:DataType="vm:PageItemViewModel">
-                <StackPanel Spacing="6" Margin="0,6">
-                  <TextBlock Text="{Binding Heading}" FontSize="12" FontWeight="SemiBold" Foreground="#78716C" />
-                  <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="13" LineHeight="20" />
-                </StackPanel>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
+
+          <DockPanel DockPanel.Dock="Bottom" IsVisible="{Binding HasDocument}" Margin="12,8">
+            <Button DockPanel.Dock="Right" Content="Open in Preview" Command="{Binding OpenInPreviewCommand}" FontSize="11" Padding="8,2" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Button Content="‹" Command="{Binding PreviousPageCommand}" FontSize="12" Padding="8,1" ToolTip.Tip="Previous page" />
+              <Button Content="›" Command="{Binding NextPageCommand}" FontSize="12" Padding="8,1" ToolTip.Tip="Next page" />
+              <TextBlock Text="{Binding PageLabel}" FontSize="12" Foreground="#78716C" VerticalAlignment="Center" Margin="4,0,0,0" />
+            </StackPanel>
+          </DockPanel>
+
+          <Border DockPanel.Dock="Top" IsVisible="{Binding HasSnippet}" Background="#FEF9C3" Margin="12,0,12,8" Padding="10,8" CornerRadius="6" MaxHeight="150">
+            <ScrollViewer>
+              <SelectableTextBlock Text="{Binding Snippet}" TextWrapping="Wrap" FontSize="12" LineHeight="18" />
+            </ScrollViewer>
+          </Border>
+
+          <TextBlock DockPanel.Dock="Top" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}"
+                     FontSize="12" Foreground="#78716C" Margin="16,4" TextWrapping="Wrap" />
+
+          <ScrollViewer Background="#F5F5F4">
+            <Image Source="{Binding PageImage, Converter={StaticResource BytesToBitmap}}" Margin="10" Stretch="Uniform" VerticalAlignment="Top" />
+          </ScrollViewer>
         </DockPanel>
       </Border>
     </Grid>

@@ -15,6 +15,8 @@ public sealed partial class ChatViewModel(Guid notebookId, IRagAnswerService ans
 
     private CancellationTokenSource? _answering;
 
+    public Func<Citation, Task>? OpenCitation { get; set; }
+
     public ObservableCollection<MessageViewModel> Messages { get; } = [];
 
     [ObservableProperty]
@@ -93,7 +95,7 @@ public sealed partial class ChatViewModel(Guid notebookId, IRagAnswerService ans
 
                     case AnswerCompleted completed:
                         buffer.Clear();
-                        reply.Complete(completed.Answer);
+                        reply.Complete(completed.Answer, citation => OpenCitation?.Invoke(citation) ?? Task.CompletedTask);
                         break;
                 }
             }
@@ -134,6 +136,15 @@ public sealed partial class MessageViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsFailed { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsUnverified { get; set; }
+
+    public ObservableCollection<CitationChipViewModel> Chips { get; } = [];
+
+    public bool HasChips => Chips.Count > 0;
+
+    public string ChipsHeading => IsNotFound ? "Closest matches" : "Sources";
+
     public bool IsThinking => IsPending && Text.Length == 0;
 
     public static MessageViewModel FromUser(string text) => new(MessageRole.User, text, isPending: false);
@@ -148,11 +159,21 @@ public sealed partial class MessageViewModel : ObservableObject
         OnPropertyChanged(nameof(IsThinking));
     }
 
-    public void Complete(Answer answer)
+    public void Complete(Answer answer, Func<Citation, Task> open)
     {
         Text = answer.Text;
         IsNotFound = answer.NotFound;
+        IsUnverified = !answer.NotFound && answer.Citations.Count == 0;
         IsPending = false;
+
+        // Several markers can point to one page, which only needs one chip.
+        foreach (var citation in answer.Citations.DistinctBy(c => (c.DocumentId, c.Page)))
+        {
+            Chips.Add(new CitationChipViewModel(citation, open));
+        }
+
+        OnPropertyChanged(nameof(HasChips));
+        OnPropertyChanged(nameof(ChipsHeading));
     }
 
     public void Stop()
@@ -172,4 +193,14 @@ public sealed partial class MessageViewModel : ObservableObject
         IsPending = false;
         IsFailed = true;
     }
+}
+
+public sealed partial class CitationChipViewModel(Citation citation, Func<Citation, Task> open) : ObservableObject
+{
+    public Citation Citation { get; } = citation;
+
+    public string Label { get; } = $"{citation.FileName} · p. {citation.Page}";
+
+    [RelayCommand]
+    private Task OpenAsync() => open(Citation);
 }

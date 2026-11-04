@@ -14,11 +14,11 @@ public class NotebookViewModelTests
 
     private readonly IDocumentRepository _documents = Substitute.For<IDocumentRepository>();
     private readonly IDocumentLibrary _library = Substitute.For<IDocumentLibrary>();
-    private readonly IPdfTextExtractor _extractor = Substitute.For<IPdfTextExtractor>();
+    private readonly IPageRenderer _renderer = Substitute.For<IPageRenderer>();
     private readonly IIndexingQueue _indexing = Substitute.For<IIndexingQueue>();
 
     private NotebookViewModel CreateViewModel() =>
-        new(Notebook, _documents, _library, _extractor, Substitute.For<IFilePicker>(), _indexing, Substitute.For<IRagAnswerService>());
+        new(Notebook, _documents, _library, Substitute.For<IFilePicker>(), _indexing, Substitute.For<IRagAnswerService>(), _renderer);
 
     private static Document Doc(string name, int pages = 1, int empty = 0) => new(
         Guid.NewGuid(), Notebook.Id, name, $"/stored/{name}", "hash", pages, empty, DocumentStatus.Queued, null, DateTimeOffset.UtcNow);
@@ -31,7 +31,6 @@ public class NotebookViewModelTests
     public async Task Imported_source_appears()
     {
         GivenImportReturns(Doc("a.pdf"));
-        _extractor.ExtractAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new ExtractedDocument([]));
         var viewModel = CreateViewModel();
 
         await viewModel.ImportFilesAsync(["/tmp/a.pdf"]);
@@ -71,7 +70,6 @@ public class NotebookViewModelTests
             .ThrowsAsync(new PdfExtractionException("Couldn't read bad.pdf.", new Exception()));
         _library.ImportAsync(Notebook.Id, "/tmp/good.pdf", Arg.Any<CancellationToken>())
             .Returns(new ImportResult(Doc("good.pdf"), false));
-        _extractor.ExtractAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new ExtractedDocument([]));
         var viewModel = CreateViewModel();
 
         await viewModel.ImportFilesAsync(["/tmp/bad.pdf", "/tmp/good.pdf"]);
@@ -81,22 +79,62 @@ public class NotebookViewModelTests
     }
 
     [Fact]
-    public async Task Shows_the_pages_of_the_selected_source()
+    public async Task Selecting_a_source_opens_its_first_page()
     {
-        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([Doc("a.pdf")]);
-        _extractor.ExtractAsync("/stored/a.pdf", Arg.Any<CancellationToken>()).Returns(new ExtractedDocument(
-        [
-            new ExtractedPage(1, "Some page text", true),
-            new ExtractedPage(2, "", false),
-        ]));
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([Doc("a.pdf", pages: 3)]);
+        _renderer.RenderPngAsync("/stored/a.pdf", 1, Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns([1, 2, 3]);
         var viewModel = CreateViewModel();
         await viewModel.LoadAsync();
 
         viewModel.SelectedSource = viewModel.Sources[0];
-        await viewModel.ShowPagesAsync(viewModel.SelectedSource);
 
-        viewModel.Pages.Select(p => p.Heading).ShouldBe(["Page 1", "Page 2"]);
-        viewModel.Pages.Last().Text.ShouldBe("No text found on this page.");
+        viewModel.Panel.IsOpen.ShouldBeTrue();
+        viewModel.Panel.Title.ShouldBe("a.pdf");
+        viewModel.Panel.PageLabel.ShouldBe("Page 1 of 3");
+        viewModel.Panel.HasSnippet.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Closing_the_panel_clears_the_selection()
+    {
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([Doc("a.pdf")]);
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+        viewModel.SelectedSource = viewModel.Sources[0];
+
+        viewModel.Panel.CloseCommand.Execute(null);
+
+        viewModel.SelectedSource.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task A_citation_opens_its_page_with_the_passage()
+    {
+        var document = Doc("a.pdf", pages: 9);
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([document]);
+        _renderer.RenderPngAsync("/stored/a.pdf", 7, Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns([7]);
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+
+        await viewModel.OpenCitationAsync(new Citation(1, document.Id, "a.pdf", 7, "The passage."));
+
+        viewModel.Panel.Page.ShouldBe(7);
+        viewModel.Panel.Snippet.ShouldBe("The passage.");
+        viewModel.Panel.PageImage.ShouldBe([(byte)7]);
+    }
+
+    [Fact]
+    public async Task A_citation_to_a_removed_source_still_shows_its_passage()
+    {
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+
+        await viewModel.OpenCitationAsync(new Citation(1, Guid.NewGuid(), "gone.pdf", 2, "The passage."));
+
+        viewModel.Panel.IsOpen.ShouldBeTrue();
+        viewModel.Panel.Snippet.ShouldBe("The passage.");
+        viewModel.Panel.HasDocument.ShouldBeFalse();
+        viewModel.Panel.Problem!.ShouldContain("no longer");
     }
 
     [Fact]

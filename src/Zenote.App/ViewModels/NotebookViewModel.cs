@@ -12,30 +12,34 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     private readonly Notebook _notebook;
     private readonly IDocumentRepository _documents;
     private readonly IDocumentLibrary _library;
-    private readonly IPdfTextExtractor _extractor;
     private readonly IFilePicker _filePicker;
     private readonly IIndexingQueue _indexing;
     private readonly SynchronizationContext? _uiContext = SynchronizationContext.Current;
-
-    private int _pagesRequest;
 
     public NotebookViewModel(
         Notebook notebook,
         IDocumentRepository documents,
         IDocumentLibrary library,
-        IPdfTextExtractor extractor,
         IFilePicker filePicker,
         IIndexingQueue indexing,
-        IRagAnswerService answers)
+        IRagAnswerService answers,
+        IPageRenderer pageRenderer)
     {
         _notebook = notebook;
         _documents = documents;
         _library = library;
-        _extractor = extractor;
         _filePicker = filePicker;
         _indexing = indexing;
         Title = notebook.Title;
-        Chat = new ChatViewModel(notebook.Id, answers);
+        Chat = new ChatViewModel(notebook.Id, answers) { OpenCitation = OpenCitationAsync };
+        Panel = new SourcePanelViewModel(pageRenderer);
+        Panel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SourcePanelViewModel.IsOpen) && !Panel.IsOpen)
+            {
+                SelectedSource = null;
+            }
+        };
         _indexing.ProgressChanged += OnIndexingProgress;
     }
 
@@ -45,12 +49,11 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
 
     public ChatViewModel Chat { get; }
 
+    public SourcePanelViewModel Panel { get; }
+
     public ObservableCollection<SourceItemViewModel> Sources { get; } = [];
 
-    public ObservableCollection<PageItemViewModel> Pages { get; } = [];
-
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsReaderOpen))]
     public partial SourceItemViewModel? SelectedSource { get; set; }
 
     [ObservableProperty]
@@ -61,8 +64,6 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     public partial bool IsImporting { get; set; }
 
     public bool HasMessage => Message is not null;
-
-    public bool IsReaderOpen => SelectedSource is not null;
 
     public bool HasNoSources => Sources.Count == 0;
 
@@ -122,34 +123,17 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(HasNoSources));
     }
 
-    public async Task ShowPagesAsync(SourceItemViewModel? source)
+    public async Task OpenCitationAsync(Citation citation)
     {
-        var request = ++_pagesRequest;
-        Pages.Clear();
+        SelectedSource = null;
 
-        if (source is null)
+        if (Sources.FirstOrDefault(source => source.Document.Id == citation.DocumentId) is { } source)
         {
-            return;
+            await Panel.OpenAsync(source.Document, citation.Page, citation.Snippet);
         }
-
-        try
+        else
         {
-            var extracted = await _extractor.ExtractAsync(source.Document.StoredPath, CancellationToken.None);
-
-            // Another source may have been selected while this one was being read.
-            if (request != _pagesRequest)
-            {
-                return;
-            }
-
-            foreach (var page in extracted.Pages)
-            {
-                Pages.Add(new PageItemViewModel(page));
-            }
-        }
-        catch (PdfExtractionException ex)
-        {
-            Message = ex.Message;
+            Panel.OpenSnippetOnly(citation);
         }
     }
 
@@ -160,7 +144,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         Sources.Remove(source);
         if (SelectedSource == source)
         {
-            SelectedSource = null;
+            Panel.Close();
         }
 
         OnPropertyChanged(nameof(HasNoSources));
@@ -191,13 +175,16 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     private void Apply(IndexingProgress progress) =>
         Sources.FirstOrDefault(source => source.Document.Id == progress.DocumentId)?.Apply(progress);
 
-    partial void OnSelectedSourceChanged(SourceItemViewModel? value) => _ = ShowPagesAsync(value);
+    partial void OnSelectedSourceChanged(SourceItemViewModel? value)
+    {
+        if (value is not null)
+        {
+            _ = Panel.OpenAsync(value.Document, page: 1, snippet: null);
+        }
+    }
 
     [RelayCommand]
     private async Task AddPdfsAsync() => await ImportFilesAsync(await _filePicker.PickPdfsAsync());
-
-    [RelayCommand]
-    private void CloseReader() => SelectedSource = null;
 
     [RelayCommand]
     private Task BackAsync() => BackRequested?.Invoke() ?? Task.CompletedTask;
@@ -259,11 +246,4 @@ public sealed partial class SourceItemViewModel(Document document, NotebookViewM
 
     [RelayCommand]
     private Task RetryAsync() => parent.RetryIndexingAsync(this);
-}
-
-public sealed class PageItemViewModel(ExtractedPage page)
-{
-    public string Heading { get; } = $"Page {page.PageNumber}";
-    public string Text { get; } = page.HasText ? page.Text : "No text found on this page.";
-    public bool HasText { get; } = page.HasText;
 }

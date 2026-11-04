@@ -42,6 +42,27 @@
                     </Style>
                   </SelectableTextBlock.Styles>
                 </SelectableTextBlock>
+
+                <TextBlock IsVisible="{Binding IsUnverified}" FontSize="12" Foreground="#B45309"
+                           Text="Unverified: this answer has no citations, so check it against your sources." TextWrapping="Wrap" />
+
+                <StackPanel IsVisible="{Binding HasChips}" Spacing="4" Margin="0,4,0,0">
+                  <TextBlock Text="{Binding ChipsHeading}" FontSize="11" Foreground="#78716C" />
+                  <ItemsControl ItemsSource="{Binding Chips}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:CitationChipViewModel">
+                        <Button Content="{Binding Label}" Command="{Binding OpenCommand}" ToolTip.Tip="Show this page"
+                                FontSize="12" Padding="10,3" Margin="0,0,6,6" CornerRadius="12"
+                                Background="#EEF2FF" Foreground="#3730A3" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
               </StackPanel>
             </Panel>
           </DataTemplate>

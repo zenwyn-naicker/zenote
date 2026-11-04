@@ -47,7 +47,7 @@ public class RagAnswerServiceTests
         Streamed(events).ShouldBe("You get twenty days [1].");
         Final(events).Text.ShouldBe("You get twenty days [1].");
         Final(events).NotFound.ShouldBeFalse();
-        Final(events).Sources.Count.ShouldBe(1);
+        Final(events).Citations.Single().Page.ShouldBe(1);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class RagAnswerServiceTests
         chat.Calls.ShouldBe(0);
         Final(events).NotFound.ShouldBeTrue();
         Final(events).Text.ShouldBe(RagAnswerService.NotFoundText);
-        Final(events).Sources.Count.ShouldBe(3);
+        Final(events).Citations.Count.ShouldBe(3);
     }
 
     [Theory]
@@ -88,6 +88,17 @@ public class RagAnswerServiceTests
 
         Streamed(events).ShouldBe("Not all staff qualify [1].");
         Final(events).NotFound.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Invented_source_numbers_are_removed()
+    {
+        GivenRetrieval(true, Chunk(1, "text"));
+
+        var events = await AskAsync(new FakeChatClient("Twenty days [1] and more [7]."));
+
+        Final(events).Text.ShouldBe("Twenty days [1] and more.");
+        Final(events).Citations.Single().Marker.ShouldBe(1);
     }
 
     [Fact]
