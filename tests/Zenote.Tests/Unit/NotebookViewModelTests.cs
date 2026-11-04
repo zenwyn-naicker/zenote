@@ -15,9 +15,10 @@ public class NotebookViewModelTests
     private readonly IDocumentRepository _documents = Substitute.For<IDocumentRepository>();
     private readonly IDocumentLibrary _library = Substitute.For<IDocumentLibrary>();
     private readonly IPdfTextExtractor _extractor = Substitute.For<IPdfTextExtractor>();
+    private readonly IIndexingQueue _indexing = Substitute.For<IIndexingQueue>();
 
     private NotebookViewModel CreateViewModel() =>
-        new(Notebook, _documents, _library, _extractor, Substitute.For<IFilePicker>());
+        new(Notebook, _documents, _library, _extractor, Substitute.For<IFilePicker>(), _indexing);
 
     private static Document Doc(string name, int pages = 1, int empty = 0) => new(
         Guid.NewGuid(), Notebook.Id, name, $"/stored/{name}", "hash", pages, empty, DocumentStatus.Queued, null, DateTimeOffset.UtcNow);
@@ -97,6 +98,50 @@ public class NotebookViewModelTests
 
         viewModel.Pages.Select(p => p.Heading).ShouldBe(["Page 1", "Page 2"]);
         viewModel.Pages.Last().Text.ShouldBe("No text found on this page.");
+    }
+
+    [Fact]
+    public async Task Source_shows_indexing_progress_then_its_page_count()
+    {
+        var document = Doc("a.pdf", pages: 3);
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([document]);
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+        var source = viewModel.Sources[0];
+
+        _indexing.ProgressChanged += Raise.Event<EventHandler<IndexingProgress>>(
+            _indexing, new IndexingProgress(document.Id, DocumentStatus.Embedding, 4, 16));
+
+        source.Summary.ShouldBe("Indexing 4 of 16");
+        source.ProgressPercent.ShouldBe(25);
+        source.IsIndexing.ShouldBeTrue();
+
+        _indexing.ProgressChanged += Raise.Event<EventHandler<IndexingProgress>>(
+            _indexing, new IndexingProgress(document.Id, DocumentStatus.Ready, 0, 0));
+
+        source.Summary.ShouldBe("3 pages");
+        source.IsIndexing.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Failed_source_shows_the_reason_and_can_retry()
+    {
+        var document = Doc("a.pdf");
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([document]);
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+        var source = viewModel.Sources[0];
+
+        _indexing.ProgressChanged += Raise.Event<EventHandler<IndexingProgress>>(
+            _indexing, new IndexingProgress(document.Id, DocumentStatus.Failed, 0, 0, "Couldn't reach Ollama."));
+
+        source.Summary.ShouldBe("Couldn't reach Ollama.");
+        source.CanRetry.ShouldBeTrue();
+
+        await source.RetryCommand.ExecuteAsync(null);
+
+        await _indexing.Received(1).EnqueueAsync(document, Arg.Any<CancellationToken>());
+        source.Status.ShouldBe(DocumentStatus.Queued);
     }
 
     [Fact]

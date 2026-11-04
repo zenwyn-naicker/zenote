@@ -61,9 +61,16 @@ public sealed class NotebookRepository(SqliteConnectionFactory connections) : IN
     public async Task DeleteAsync(Guid id, CancellationToken ct)
     {
         using var connection = connections.Open();
+        using var transaction = connection.BeginTransaction();
         using var command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM notebooks WHERE id = $id";
+        command.Transaction = transaction;
+        command.CommandText = """
+            DELETE FROM vec_chunks WHERE rowid IN (
+              SELECT c.id FROM chunks c JOIN documents d ON d.id = c.document_id WHERE d.notebook_id = $id);
+            DELETE FROM notebooks WHERE id = $id;
+            """;
         command.Parameters.AddWithValue("$id", id.ToString());
         await command.ExecuteNonQueryAsync(ct);
+        transaction.Commit();
     }
 }

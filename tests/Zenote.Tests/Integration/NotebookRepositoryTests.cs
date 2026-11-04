@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Options;
 using Shouldly;
+using Zenote.Core.Options;
 using Zenote.Infrastructure.Persistence;
 using Zenote.Tests.Support;
 
@@ -18,7 +20,7 @@ public sealed class NotebookRepositoryTests : IDisposable
         await _workspace.Notebooks.CreateAsync("Taxes 2026", _ct);
 
         var connections = new SqliteConnectionFactory(_workspace.Paths.DatabasePath);
-        new DatabaseInitializer(connections).Initialize();
+        new DatabaseInitializer(connections, Options.Create(new ModelOptions())).Initialize();
         var notebooks = await new NotebookRepository(connections).ListAsync(_ct);
 
         notebooks.Single().Notebook.Title.ShouldBe("Taxes 2026");

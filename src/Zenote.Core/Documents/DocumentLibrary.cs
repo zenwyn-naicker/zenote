@@ -8,7 +8,8 @@ public sealed class DocumentLibrary(
     IPdfTextExtractor extractor,
     IDocumentRepository documents,
     INotebookRepository notebooks,
-    IDocumentFileStore files) : IDocumentLibrary
+    IDocumentFileStore files,
+    IIndexingQueue indexing) : IDocumentLibrary
 {
     public async Task<ImportResult> ImportAsync(Guid notebookId, string sourcePath, CancellationToken ct)
     {
@@ -47,17 +48,25 @@ public sealed class DocumentLibrary(
             throw;
         }
 
+        await indexing.EnqueueAsync(document, ct);
+
         return new ImportResult(document, AlreadyImported: false);
     }
 
     public async Task DeleteDocumentAsync(Document document, CancellationToken ct)
     {
+        await indexing.CancelAsync(document.Id);
         await documents.DeleteAsync(document.Id, ct);
         files.Delete(document.StoredPath);
     }
 
     public async Task DeleteNotebookAsync(Guid notebookId, CancellationToken ct)
     {
+        foreach (var document in await documents.ListAsync(notebookId, ct))
+        {
+            await indexing.CancelAsync(document.Id);
+        }
+
         await notebooks.DeleteAsync(notebookId, ct);
         files.DeleteNotebook(notebookId);
     }

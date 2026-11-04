@@ -1,8 +1,14 @@
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Options;
+using Zenote.Core.Chunking;
 using Zenote.Core.Documents;
+using Zenote.Core.Domain;
+using Zenote.Core.Indexing;
+using Zenote.Core.Options;
 using Zenote.Infrastructure.Pdf;
 using Zenote.Infrastructure.Persistence;
 using Zenote.Infrastructure.Storage;
+using Zenote.Infrastructure.Vectors;
 
 namespace Zenote.Tests.Support;
 
@@ -15,17 +21,27 @@ public sealed class TestWorkspace : IDisposable
         Directory.CreateDirectory(Paths.Root);
 
         Connections = new SqliteConnectionFactory(Paths.DatabasePath);
-        new DatabaseInitializer(Connections).Initialize();
+        new DatabaseInitializer(Connections, Options.Create(new ModelOptions())).Initialize();
 
         Notebooks = new NotebookRepository(Connections);
         Documents = new DocumentRepository(Connections);
-        Library = new DocumentLibrary(new PdfPigTextExtractor(), Documents, Notebooks, new DocumentFileStore(Paths));
+        Vectors = new SqliteVecVectorStore(Connections);
+        Queue = new IndexingQueue(
+            new PdfPigTextExtractor(),
+            new PageChunker(Options.Create(new ChunkingOptions())),
+            Embedder,
+            Documents,
+            Vectors);
+        Library = new DocumentLibrary(new PdfPigTextExtractor(), Documents, Notebooks, new DocumentFileStore(Paths), Queue);
     }
 
     public AppPaths Paths { get; }
     public SqliteConnectionFactory Connections { get; }
     public NotebookRepository Notebooks { get; }
     public DocumentRepository Documents { get; }
+    public SqliteVecVectorStore Vectors { get; }
+    public FakeEmbedder Embedder { get; } = new();
+    public IndexingQueue Queue { get; }
     public DocumentLibrary Library { get; }
 
     public string WriteFile(string name, byte[] bytes)
@@ -38,8 +54,41 @@ public sealed class TestWorkspace : IDisposable
         return path;
     }
 
+    /// Imports a PDF and waits for indexing to reach the given status.
+    public async Task<Document> ImportAndWaitAsync(Guid notebookId, string name, byte[] pdf, DocumentStatus status = DocumentStatus.Ready)
+    {
+        // Asynchronous continuations keep the test off the indexing worker's thread.
+        var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Guid? target = null;
+
+        void OnProgress(object? sender, IndexingProgress progress)
+        {
+            if (progress.Stage == status && (target is null || target == progress.DocumentId))
+            {
+                finished.TrySetResult();
+            }
+        }
+
+        Queue.ProgressChanged += OnProgress;
+        var result = await Library.ImportAsync(notebookId, WriteFile(name, pdf), TestContext.Current.CancellationToken);
+        target = result.Document.Id;
+        await finished.Task.WaitAsync(TimeSpan.FromSeconds(20), TestContext.Current.CancellationToken);
+        Queue.ProgressChanged -= OnProgress;
+
+        return result.Document;
+    }
+
+    public long Count(string table)
+    {
+        using var connection = Connections.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT COUNT(*) FROM {table}";
+        return (long)command.ExecuteScalar()!;
+    }
+
     public void Dispose()
     {
+        Queue.Dispose();
         SqliteConnection.ClearAllPools();
         Directory.Delete(Paths.Root, recursive: true);
     }

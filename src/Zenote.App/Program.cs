@@ -61,7 +61,8 @@ public static class Program
             provider.GetRequiredService<IDocumentRepository>(),
             provider.GetRequiredService<IDocumentLibrary>(),
             provider.GetRequiredService<IPdfTextExtractor>(),
-            provider.GetRequiredService<IFilePicker>()));
+            provider.GetRequiredService<IFilePicker>(),
+            provider.GetRequiredService<IIndexingQueue>()));
 
     // Prints the same checks as the status bar, so a published build can be tested without the UI.
     private static int RunSelfCheck()

@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 5)
+# Zenote — Project Plan (rev 6)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,15 @@
 
 ## Status
 
-**M0 merged and tagged `m0`** (4 Nov 2026). **M1 built on branch `m1-notebooks`**. Next: M2.
+M0 and M1 are merged and tagged. **M2 is in review.** Next: M3.
+
+## What changed in rev 6 (learned in M2)
+
+- `NomicTextEmbedder` became `OllamaTextEmbedder`: vector size and prefixes come from `ModelOptions`, so any Ollama embedding model works.
+- Changing the embedding model **rebuilds automatically**. `DatabaseInitializer` drops the vectors, re-queues every document,
+  and the app re-embeds on launch. That replaces the planned "Rebuild index" button.
+- Dropped `InMemoryVectorStore`: sqlite-vec is proven, so the fallback would be unused code. Tests use the real store.
+- First real numbers: relevant question 0.71 cosine, unrelated question 0.51. The 0.55 starting gate looks plausible; M3 calibrates it.
 
 ## What changed in rev 5 (learned in M1)
 

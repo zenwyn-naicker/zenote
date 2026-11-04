@@ -17,6 +17,7 @@ public partial class App : Application
         {
             var viewModel = Program.Services.GetRequiredService<MainWindowViewModel>();
             desktop.MainWindow = new MainWindow { DataContext = viewModel };
+            desktop.ShutdownRequested += (_, _) => (Program.Services as IDisposable)?.Dispose();
             _ = viewModel.StartAsync();
         }
 
