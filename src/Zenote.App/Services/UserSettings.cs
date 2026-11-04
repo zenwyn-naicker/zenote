@@ -8,11 +8,7 @@ public sealed class UserSettings(string path)
 {
     public string Path { get; } = path;
 
-    public void SaveOllamaUrl(string url) => Save("OllamaUrl", url);
-
-    public void SaveChatModel(string model) => Save("ChatModel", model);
-
-    private void Save(string key, string value)
+    public void SaveChatModel(string model)
     {
         var settings = File.Exists(Path) ? JsonNode.Parse(File.ReadAllText(Path))!.AsObject() : [];
 
@@ -22,7 +18,7 @@ public sealed class UserSettings(string path)
             settings["Models"] = models;
         }
 
-        models[key] = value;
+        models["ChatModel"] = model;
         File.WriteAllText(Path, settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
     }
 }

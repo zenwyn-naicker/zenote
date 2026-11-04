@@ -55,29 +55,24 @@
               </StackPanel>
             </DockPanel>
 
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SearchModel}" FontSize="13" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+              <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Search model" FontSize="14" FontWeight="Medium" />
+                <TextBlock Text="Finds the passages in your sources that answers are based on." FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DockPanel>
+
             <Border Height="1" Background="{StaticResource LineBrush}" />
 
-            <StackPanel Spacing="10">
-              <DockPanel>
-                <Button DockPanel.Dock="Right" Classes="pill" Height="32" Content="Change address" Command="{Binding ToggleAddressCommand}" VerticalAlignment="Center" />
-                <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
-                  <TextBlock Text="Ollama" FontSize="14" FontWeight="Medium" />
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Ellipse Width="8" Height="8" Fill="#1E8E3E" IsVisible="{Binding IsConnected}" VerticalAlignment="Center" />
-                    <Ellipse Width="8" Height="8" Fill="{StaticResource DangerBrush}" IsVisible="{Binding !IsConnected}" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding ConnectionText}" FontSize="12" Foreground="{StaticResource MutedBrush}" />
-                  </StackPanel>
-                </StackPanel>
-              </DockPanel>
-
-              <DockPanel IsVisible="{Binding IsEditingAddress}">
-                <Button DockPanel.Dock="Right" Classes="pill primary" Height="36" Content="Save" Command="{Binding SaveCommand}" Margin="8,0,0,0" />
-                <TextBox Classes="field" Text="{Binding OllamaUrl}" />
-              </DockPanel>
-
-              <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource WarningBrush}"
-                         IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
-            </StackPanel>
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Ellipse Width="8" Height="8" Fill="#1E8E3E" IsVisible="{Binding IsConnected}" VerticalAlignment="Center" />
+                <Ellipse Width="8" Height="8" Fill="{StaticResource DangerBrush}" IsVisible="{Binding !IsConnected}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ConnectionText}" FontSize="13" Foreground="{StaticResource MutedBrush}" />
+              </StackPanel>
+              <TextBlock Text="Ollama" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" />
+            </DockPanel>
 
             <Border Height="1" Background="{StaticResource LineBrush}" />
 
@@ -89,7 +84,6 @@
               </StackPanel>
             </DockPanel>
 
-            <TextBlock Text="{Binding AboutText}" FontSize="11" Foreground="{StaticResource FaintBrush}" Margin="0,4,0,0" />
           </StackPanel>
         </Border>
       </Border>

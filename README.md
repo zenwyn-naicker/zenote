@@ -119,7 +119,7 @@ The app is ad-hoc signed rather than notarised, so macOS will warn about a downl
 
 ## Configuration
 
-**Settings** (top right) switches the chat model between any you've pulled with Ollama, shows the Ollama connection and can change its address. Defaults live in `src/Zenote.App/appsettings.json`. Changing the embedding model there rebuilds the index on the next launch.
+**Settings** (top right) switches the chat model between any you've pulled with Ollama, and shows the search model and Ollama connection. Defaults, including the Ollama address, live in `src/Zenote.App/appsettings.json`. Changing the embedding model there rebuilds the index on the next launch.
 
 Your notebooks are stored in `~/Library/Application Support/Zenote`.
 

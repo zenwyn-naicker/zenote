@@ -24,7 +24,8 @@ M0 to M6 are merged and tagged. **M7 is in review.** Next: your testing and feed
   | `gemma4:e4b` | 96% | 96% | 8/8 | 3.4 s | 9.5 GB |
   | `phi4-mini` | 96% | 81% | 8/8 | 2.9 s | 2.5 GB |
 
-- **Settings has a purpose now:** live model switching, Ollama status and address, and where your data lives.
+- **Settings has a purpose now:** live chat model switching, which search model is in use, Ollama status, and where your data lives.
+  The search model is read-only, because changing it means re-embedding everything and the eval showed no gain. The Ollama address stays in `appsettings.json`.
   `SwitchableChatClient` changes model without a restart.
 - The cited passage box was removed, because the rendered page sits right below it. It only shows when the source has been deleted.
 - `[1-6]` ranges and `[1], [2]` lists now parse properly. Stopped answers are labelled "Stopped".

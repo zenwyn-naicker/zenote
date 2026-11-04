@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shouldly;
@@ -21,9 +20,8 @@ public sealed class SettingsViewModelTests : IDisposable
 
     private SettingsViewModel CreateViewModel()
     {
-        var settings = new UserSettings(_path);
-        var picker = new ModelPickerViewModel(_models, settings, Substitute.For<IModelWarmup>());
-        return new SettingsViewModel(settings, Options.Create(new ModelOptions()), picker, _health, new AppPaths("/tmp/zenote"));
+        var picker = new ModelPickerViewModel(_models, new UserSettings(_path), Substitute.For<IModelWarmup>());
+        return new SettingsViewModel(Options.Create(new ModelOptions()), picker, _health, new AppPaths("/tmp/zenote"));
     }
 
     [Fact]
@@ -55,49 +53,8 @@ public sealed class SettingsViewModelTests : IDisposable
     }
 
     [Fact]
-    public void Starts_with_the_current_address()
+    public void Shows_the_search_model()
     {
-        CreateViewModel().OllamaUrl.ShouldBe("http://localhost:11434");
-    }
-
-    [Fact]
-    public void Saves_in_the_shape_the_app_reads_back()
-    {
-        var viewModel = CreateViewModel();
-        viewModel.OllamaUrl = " http://localhost:9999 ";
-
-        viewModel.SaveCommand.Execute(null);
-
-        using var saved = JsonDocument.Parse(File.ReadAllText(_path));
-        saved.RootElement.GetProperty("Models").GetProperty("OllamaUrl").GetString().ShouldBe("http://localhost:9999");
-        viewModel.IsSaved.ShouldBeTrue();
-        viewModel.Message!.ShouldContain("Restart");
-    }
-
-    [Fact]
-    public void Saving_one_setting_keeps_the_other()
-    {
-        var settings = new UserSettings(_path);
-
-        settings.SaveChatModel("gemma4:e4b");
-        settings.SaveOllamaUrl("http://localhost:9999");
-
-        using var saved = JsonDocument.Parse(File.ReadAllText(_path));
-        saved.RootElement.GetProperty("Models").GetProperty("ChatModel").GetString().ShouldBe("gemma4:e4b");
-    }
-
-    [Theory]
-    [InlineData("localhost")]
-    [InlineData("ftp://localhost:11434")]
-    [InlineData("")]
-    public void Rejects_an_address_that_is_not_a_web_url(string url)
-    {
-        var viewModel = CreateViewModel();
-        viewModel.OllamaUrl = url;
-
-        viewModel.SaveCommand.Execute(null);
-
-        File.Exists(_path).ShouldBeFalse();
-        viewModel.IsSaved.ShouldBeFalse();
+        CreateViewModel().SearchModel.ShouldBe("nomic-embed-text");
     }
 }
