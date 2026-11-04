@@ -8,18 +8,28 @@ using Zenote.Core.Domain;
 
 namespace Zenote.App.ViewModels;
 
-public sealed partial class ChatViewModel(
-    Guid notebookId,
-    IRagAnswerService answers,
-    IConversationRepository conversations) : ObservableObject
+public sealed partial class ChatViewModel : ObservableObject
 {
     // Updating the UI per token would flood it, so streamed text is flushed in small batches.
     private static readonly TimeSpan FlushInterval = TimeSpan.FromMilliseconds(40);
 
     private const int MaxTitleLength = 60;
 
+    private readonly Guid _notebookId;
+    private readonly IRagAnswerService _answers;
+    private readonly IConversationRepository _conversations;
+
     private CancellationTokenSource? _answering;
     private bool _switching;
+
+    public ChatViewModel(Guid notebookId, IRagAnswerService answers, IConversationRepository conversations)
+    {
+        _notebookId = notebookId;
+        _answers = answers;
+        _conversations = conversations;
+        Messages.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasNoMessages));
+        Conversations.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasConversations));
+    }
 
     public Func<Citation, Task>? OpenCitation { get; set; }
 
@@ -28,7 +38,28 @@ public sealed partial class ChatViewModel(
     public ObservableCollection<ConversationItemViewModel> Conversations { get; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentChatTitle))]
     public partial ConversationItemViewModel? SelectedConversation { get; set; }
+
+    [ObservableProperty]
+    public partial string NotebookTitle { get; set; } = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourcesLabel), nameof(HasSources), nameof(HasNoSources), nameof(InputHint))]
+    [NotifyCanExecuteChangedFor(nameof(SendCommand))]
+    public partial int SourceCount { get; set; }
+
+    public string InputHint => HasSources ? "Start typing…" : "Add a source to get started";
+
+    public string SourcesLabel => SourceCount == 1 ? "1 source" : $"{SourceCount} sources";
+
+    public bool HasSources => SourceCount > 0;
+
+    public bool HasNoSources => SourceCount == 0;
+
+    public bool HasConversations => Conversations.Count > 0;
+
+    public string CurrentChatTitle => SelectedConversation?.Title ?? "New chat";
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SendCommand))]
@@ -41,11 +72,13 @@ public sealed partial class ChatViewModel(
 
     public bool IsIdle => !IsAnswering;
 
-    private bool CanSend => !IsAnswering && !string.IsNullOrWhiteSpace(Input);
+    public bool HasNoMessages => Messages.Count == 0;
+
+    private bool CanSend => HasSources && !IsAnswering && !string.IsNullOrWhiteSpace(Input);
 
     public async Task LoadAsync()
     {
-        var saved = await conversations.ListAsync(notebookId, CancellationToken.None);
+        var saved = await _conversations.ListAsync(_notebookId, CancellationToken.None);
 
         Conversations.Clear();
         foreach (var conversation in saved)
@@ -72,7 +105,7 @@ public sealed partial class ChatViewModel(
             return;
         }
 
-        foreach (var message in await conversations.GetMessagesAsync(item.Conversation.Id, CancellationToken.None))
+        foreach (var message in await _conversations.GetMessagesAsync(item.Conversation.Id, CancellationToken.None))
         {
             Messages.Add(MessageViewModel.FromSaved(message, OpenAsync));
         }
@@ -80,19 +113,22 @@ public sealed partial class ChatViewModel(
 
     internal async Task RenameAsync(ConversationItemViewModel item, string title)
     {
-        await conversations.RenameAsync(item.Conversation.Id, title, CancellationToken.None);
+        await _conversations.RenameAsync(item.Conversation.Id, title, CancellationToken.None);
         item.Title = title;
+        OnPropertyChanged(nameof(CurrentChatTitle));
     }
 
     internal async Task DeleteAsync(ConversationItemViewModel item)
     {
-        await conversations.DeleteAsync(item.Conversation.Id, CancellationToken.None);
-        Conversations.Remove(item);
+        await _conversations.DeleteAsync(item.Conversation.Id, CancellationToken.None);
 
+        // Clear the selection first, so the list isn't removing and deselecting at the same moment.
         if (SelectedConversation == item)
         {
             await ShowAsync(null);
         }
+
+        Conversations.Remove(item);
     }
 
     partial void OnSelectedConversationChanged(ConversationItemViewModel? value)
@@ -161,7 +197,7 @@ public sealed partial class ChatViewModel(
         }
 
         var title = firstQuestion.Length <= MaxTitleLength ? firstQuestion : $"{firstQuestion[..MaxTitleLength].TrimEnd()}…";
-        var conversation = await conversations.CreateAsync(notebookId, title, CancellationToken.None);
+        var conversation = await _conversations.CreateAsync(_notebookId, title, CancellationToken.None);
         var item = new ConversationItemViewModel(conversation, this);
 
         Conversations.Insert(0, item);
@@ -174,7 +210,7 @@ public sealed partial class ChatViewModel(
     }
 
     private Task SaveAsync(Conversation conversation, MessageRole role, string text, bool notFound, IReadOnlyList<Citation> citations) =>
-        conversations.AppendMessageAsync(
+        _conversations.AppendMessageAsync(
             new Message(Guid.NewGuid(), conversation.Id, role, text, notFound, citations, DateTimeOffset.UtcNow),
             CancellationToken.None);
 
@@ -185,7 +221,7 @@ public sealed partial class ChatViewModel(
 
         try
         {
-            await foreach (var answerEvent in answers.AskAsync(notebookId, question, history, ct))
+            await foreach (var answerEvent in _answers.AskAsync(_notebookId, question, history, ct))
             {
                 switch (answerEvent)
                 {
@@ -218,6 +254,8 @@ public sealed partial class ChatViewModel(
 
 public sealed partial class MessageViewModel : ObservableObject
 {
+    private readonly Dictionary<int, CitationChipViewModel> _chipsByMarker = [];
+
     private MessageViewModel(MessageRole role, string text, bool isPending)
     {
         Role = role;
@@ -247,9 +285,14 @@ public sealed partial class MessageViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsUnverified { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsStopped { get; set; }
+
     public ObservableCollection<CitationChipViewModel> Chips { get; } = [];
 
     public IReadOnlyList<Citation> Citations { get; private set; } = [];
+
+    public CitationChipViewModel? FindChip(int marker) => _chipsByMarker.GetValueOrDefault(marker);
 
     public bool HasChips => Chips.Count > 0;
 
@@ -283,17 +326,24 @@ public sealed partial class MessageViewModel : ObservableObject
 
     public void Complete(Answer answer, Func<Citation, Task> open)
     {
+        Citations = answer.Citations;
+
+        foreach (var citation in answer.Citations)
+        {
+            var chip = new CitationChipViewModel(citation, open);
+            _chipsByMarker[citation.Marker] = chip;
+
+            // Several markers can point to one page, which only needs one chip.
+            if (!Chips.Any(c => c.Citation.DocumentId == citation.DocumentId && c.Citation.Page == citation.Page))
+            {
+                Chips.Add(chip);
+            }
+        }
+
         Text = answer.Text;
         IsNotFound = answer.NotFound;
         IsUnverified = !answer.NotFound && answer.Citations.Count == 0;
         IsPending = false;
-        Citations = answer.Citations;
-
-        // Several markers can point to one page, which only needs one chip.
-        foreach (var citation in answer.Citations.DistinctBy(c => (c.DocumentId, c.Page)))
-        {
-            Chips.Add(new CitationChipViewModel(citation, open));
-        }
 
         OnPropertyChanged(nameof(HasChips));
         OnPropertyChanged(nameof(ChipsHeading));
@@ -307,6 +357,10 @@ public sealed partial class MessageViewModel : ObservableObject
         {
             Text = "Stopped.";
             IsFailed = true;
+        }
+        else
+        {
+            IsStopped = true;
         }
     }
 

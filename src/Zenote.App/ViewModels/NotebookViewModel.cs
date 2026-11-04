@@ -14,6 +14,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     private readonly IDocumentLibrary _library;
     private readonly IFilePicker _filePicker;
     private readonly IIndexingQueue _indexing;
+    private readonly INotebookRepository _notebooks;
     private readonly SynchronizationContext? _uiContext = SynchronizationContext.Current;
 
     public NotebookViewModel(
@@ -24,29 +25,49 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         IIndexingQueue indexing,
         IRagAnswerService answers,
         IPageRenderer pageRenderer,
-        IConversationRepository conversations)
+        IConversationRepository conversations,
+        INotebookRepository notebooks)
     {
         _notebook = notebook;
         _documents = documents;
         _library = library;
         _filePicker = filePicker;
         _indexing = indexing;
+        _notebooks = notebooks;
+        _savedTitle = notebook.Title;
         Title = notebook.Title;
-        Chat = new ChatViewModel(notebook.Id, answers, conversations) { OpenCitation = OpenCitationAsync };
+        Chat = new ChatViewModel(notebook.Id, answers, conversations)
+        {
+            OpenCitation = OpenCitationAsync,
+            NotebookTitle = notebook.Title,
+        };
+        Sources.CollectionChanged += (_, _) =>
+        {
+            Chat.SourceCount = Sources.Count;
+            OnPropertyChanged(nameof(HasNoSources));
+        };
         Panel = new SourcePanelViewModel(pageRenderer);
         Panel.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(SourcePanelViewModel.IsOpen) && !Panel.IsOpen)
+            if (e.PropertyName == nameof(SourcePanelViewModel.IsOpen))
             {
-                SelectedSource = null;
+                OnPropertyChanged(nameof(ShowSources));
+
+                if (!Panel.IsOpen)
+                {
+                    SelectedSource = null;
+                }
             }
         };
         _indexing.ProgressChanged += OnIndexingProgress;
     }
 
+    private string _savedTitle;
+
     public Func<Task>? BackRequested { get; set; }
 
-    public string Title { get; }
+    [ObservableProperty]
+    public partial string Title { get; set; }
 
     public ChatViewModel Chat { get; }
 
@@ -64,7 +85,14 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool IsImporting { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowSources))]
+    public partial bool IsNarrow { get; set; }
+
     public bool HasMessage => Message is not null;
+
+    /// In a narrow window the sources make way for the page viewer, so the chat keeps its room.
+    public bool ShowSources => !(IsNarrow && Panel.IsOpen);
 
     public bool HasNoSources => Sources.Count == 0;
 
@@ -78,7 +106,6 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
             Sources.Add(new SourceItemViewModel(document, this));
         }
 
-        OnPropertyChanged(nameof(HasNoSources));
         await Chat.LoadAsync();
     }
 
@@ -122,7 +149,24 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
 
         IsImporting = false;
         Message = problems.Count == 0 ? null : string.Join(" ", problems);
-        OnPropertyChanged(nameof(HasNoSources));
+    }
+
+    public async Task SaveTitleAsync()
+    {
+        var title = Title.Trim();
+
+        if (title.Length == 0)
+        {
+            Title = _savedTitle;
+            return;
+        }
+
+        if (title != _savedTitle)
+        {
+            await _notebooks.RenameAsync(_notebook.Id, title, CancellationToken.None);
+            _savedTitle = title;
+            Chat.NotebookTitle = title;
+        }
     }
 
     public async Task OpenCitationAsync(Citation citation)
@@ -131,7 +175,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
 
         if (Sources.FirstOrDefault(source => source.Document.Id == citation.DocumentId) is { } source)
         {
-            await Panel.OpenAsync(source.Document, citation.Page, citation.Snippet);
+            await Panel.OpenAsync(source.Document, citation.Page);
         }
         else
         {
@@ -148,8 +192,6 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         {
             Panel.Close();
         }
-
-        OnPropertyChanged(nameof(HasNoSources));
     }
 
     internal Task CancelIndexingAsync(SourceItemViewModel source) => _indexing.CancelAsync(source.Document.Id);
@@ -181,7 +223,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     {
         if (value is not null)
         {
-            _ = Panel.OpenAsync(value.Document, page: 1, snippet: null);
+            _ = Panel.OpenAsync(value.Document, page: 1);
         }
     }
 
@@ -189,7 +231,15 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     private async Task AddPdfsAsync() => await ImportFilesAsync(await _filePicker.PickPdfsAsync());
 
     [RelayCommand]
-    private Task BackAsync() => BackRequested?.Invoke() ?? Task.CompletedTask;
+    private async Task BackAsync()
+    {
+        await SaveTitleAsync();
+
+        if (BackRequested is { } back)
+        {
+            await back();
+        }
+    }
 }
 
 public sealed partial class SourceItemViewModel(Document document, NotebookViewModel parent) : ObservableObject
@@ -239,6 +289,15 @@ public sealed partial class SourceItemViewModel(Document document, NotebookViewM
         Total = progress.Total;
         Error = progress.Error;
     }
+
+    [ObservableProperty]
+    public partial bool IsConfirmingRemove { get; set; }
+
+    [RelayCommand]
+    private void StartRemove() => IsConfirmingRemove = true;
+
+    [RelayCommand]
+    private void KeepSource() => IsConfirmingRemove = false;
 
     [RelayCommand]
     private Task DeleteAsync() => parent.DeleteSourceAsync(this);

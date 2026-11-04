@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Zenote.Core.Abstractions;
@@ -53,11 +54,11 @@ public sealed partial class SourcePanelViewModel(IPageRenderer renderer) : Obser
 
     private bool CanGoForward => Page < PageCount;
 
-    public async Task OpenAsync(Document document, int page, string? snippet)
+    public async Task OpenAsync(Document document, int page)
     {
         _document = document;
         Title = document.FileName;
-        Snippet = snippet;
+        Snippet = null;
         PageCount = document.PageCount;
         IsOpen = true;
 
@@ -70,7 +71,7 @@ public sealed partial class SourcePanelViewModel(IPageRenderer renderer) : Obser
         _document = null;
         _renderRequest++;
         Title = citation.FileName;
-        Snippet = citation.Snippet;
+        Snippet = Reflow(citation.Snippet);
         PageCount = 0;
         PageImage = null;
         Problem = "This source is no longer in the notebook.";
@@ -99,6 +100,9 @@ public sealed partial class SourcePanelViewModel(IPageRenderer renderer) : Obser
             Process.Start(new ProcessStartInfo("open") { ArgumentList = { _document.StoredPath } });
         }
     }
+
+    // PDFs break lines to fit the page. Joining them lets the text wrap to the panel instead.
+    private static string? Reflow(string? text) => text is null ? null : SingleLineBreak().Replace(text, " ");
 
     private async Task ShowPageAsync(int page)
     {
@@ -147,4 +151,7 @@ public sealed partial class SourcePanelViewModel(IPageRenderer renderer) : Obser
 
         return image;
     }
+
+    [GeneratedRegex(@"(?<!\n)\n(?!\n)")]
+    private static partial Regex SingleLineBreak();
 }

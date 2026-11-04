@@ -1,75 +1,90 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Zenote.App.ViewModels"
+             xmlns:controls="using:Zenote.App.Controls"
              x:Class="Zenote.App.Views.NotebooksView"
              x:DataType="vm:NotebooksViewModel">
-  <DockPanel Margin="40,32">
-    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,24">
-      <TextBlock Text="Zenote" FontSize="30" FontWeight="SemiBold" />
-      <TextBlock Text="Let your documents talk." FontSize="14" Foreground="#78716C" />
-    </StackPanel>
+  <ScrollViewer>
+    <StackPanel MaxWidth="1120" Margin="48,20,48,40">
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,44">
+        <controls:ZenoteLogo />
+        <TextBlock Text="Zenote" FontSize="18" FontWeight="Medium" VerticalAlignment="Center" />
+      </StackPanel>
 
-    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,24" MaxWidth="480" HorizontalAlignment="Left">
-      <Button DockPanel.Dock="Right" Content="New notebook" Command="{Binding CreateCommand}" Margin="8,0,0,0" />
-      <TextBox Text="{Binding NewTitle}" PlaceholderText="Notebook name" MinWidth="280">
-        <TextBox.KeyBindings>
-          <KeyBinding Gesture="Enter" Command="{Binding CreateCommand}" />
-        </TextBox.KeyBindings>
-      </TextBox>
-    </DockPanel>
+      <TextBlock Text="Let your documents talk" FontSize="40" FontWeight="Medium" LetterSpacing="-0.6" Margin="0,0,0,8" />
+      <TextBlock Text="Everything stays on your Mac." FontSize="15" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,36" />
 
-    <TextBlock DockPanel.Dock="Top" IsVisible="{Binding IsEmpty}" Foreground="#78716C"
-               Text="Create your first notebook, then add PDFs to it." />
+      <TextBlock Text="Notebooks" FontSize="18" FontWeight="Medium" Margin="0,0,0,16" />
 
-    <ScrollViewer>
-      <ItemsControl ItemsSource="{Binding Cards}">
+      <ItemsControl ItemsSource="{Binding Tiles}">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
             <WrapPanel />
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:NotebookCardViewModel">
-            <Border Width="260" Height="132" Margin="0,0,16,16" Padding="16,14" CornerRadius="10"
-                    Background="#FAFAF9" BorderBrush="#E7E5E4" BorderThickness="1">
+        <ItemsControl.DataTemplates>
+          <DataTemplate DataType="vm:CreateNotebookTile">
+            <Border Width="244" Height="196" Margin="0,0,16,16" CornerRadius="16" BorderBrush="{StaticResource LineBrush}"
+                    BorderThickness="1" Background="{StaticResource SurfaceBrush}">
+              <Button Classes="card" Command="{Binding Create}">
+                <StackPanel Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <Border Width="52" Height="52" CornerRadius="26" Background="{StaticResource AccentSoftBrush}" HorizontalAlignment="Center">
+                    <PathIcon Data="{StaticResource IconAdd}" Width="24" Height="24" Foreground="{StaticResource AccentBrush}" />
+                  </Border>
+                  <TextBlock Text="Create new notebook" FontSize="15" FontWeight="Medium" HorizontalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Border>
+          </DataTemplate>
+          <DataTemplate DataType="vm:NotebookCardViewModel">
+            <Border Width="244" Height="196" Margin="0,0,16,16" CornerRadius="16" Background="{Binding Tint}">
               <Panel>
-                <DockPanel IsVisible="{Binding IsIdle}">
-                  <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="6">
-                    <Button Content="Open" Command="{Binding OpenCommand}" FontSize="12" Padding="10,3" />
-                    <Button Content="Rename" Command="{Binding StartRenameCommand}" FontSize="12" Padding="10,3" />
-                    <Button Content="Delete" Command="{Binding StartDeleteCommand}" FontSize="12" Padding="10,3" />
-                  </StackPanel>
-                  <StackPanel Spacing="4">
-                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding Summary}" FontSize="13" Foreground="#78716C" />
-                  </StackPanel>
-                </DockPanel>
+                <Button Classes="card" Command="{Binding OpenCommand}" IsVisible="{Binding IsIdle}">
+                  <DockPanel Margin="18">
+                    <TextBlock DockPanel.Dock="Top" Text="{Binding Emoji}" FontSize="34" />
+                    <StackPanel VerticalAlignment="Bottom" Spacing="6">
+                      <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Medium" TextWrapping="Wrap" MaxLines="2"
+                                 TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                    </StackPanel>
+                  </DockPanel>
+                </Button>
 
-                <StackPanel IsVisible="{Binding IsRenaming}" Spacing="10">
-                  <TextBox Text="{Binding EditTitle}">
+                <Button Classes="icon" IsVisible="{Binding IsIdle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Margin="8" ToolTip.Tip="More">
+                  <PathIcon Data="{StaticResource IconMore}" />
+                  <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                      <MenuItem Header="Rename" Command="{Binding StartRenameCommand}" />
+                      <MenuItem Header="Delete" Command="{Binding StartDeleteCommand}" />
+                    </MenuFlyout>
+                  </Button.Flyout>
+                </Button>
+
+                <StackPanel IsVisible="{Binding IsRenaming}" Spacing="12" Margin="18" VerticalAlignment="Center">
+                  <TextBox Classes="field" Text="{Binding EditTitle}">
                     <TextBox.KeyBindings>
                       <KeyBinding Gesture="Enter" Command="{Binding SaveRenameCommand}" />
                     </TextBox.KeyBindings>
                   </TextBox>
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Button Content="Save" Command="{Binding SaveRenameCommand}" FontSize="12" Padding="10,3" />
-                    <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="12" Padding="10,3" />
+                    <Button Classes="pill primary" Height="32" Content="Save" Command="{Binding SaveRenameCommand}" />
+                    <Button Classes="pill" Height="32" Content="Cancel" Command="{Binding CancelCommand}" />
                   </StackPanel>
                 </StackPanel>
 
-                <StackPanel IsVisible="{Binding IsConfirmingDelete}" Spacing="10">
-                  <TextBlock Text="{Binding DeletePrompt}" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" FontSize="13" />
+                <StackPanel IsVisible="{Binding IsConfirmingDelete}" Spacing="12" Margin="18" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding DeletePrompt}" TextWrapping="Wrap" MaxLines="4" TextTrimming="CharacterEllipsis" FontSize="13" LineHeight="19" />
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Button Content="Delete" Command="{Binding ConfirmDeleteCommand}" FontSize="12" Padding="10,3"
-                            Foreground="#B91C1C" />
-                    <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="12" Padding="10,3" />
+                    <Button Classes="pill" Height="32" Content="Delete" Foreground="{StaticResource DangerBrush}" Command="{Binding ConfirmDeleteCommand}" />
+                    <Button Classes="pill" Height="32" Content="Cancel" Command="{Binding CancelCommand}" />
                   </StackPanel>
                 </StackPanel>
               </Panel>
             </Border>
           </DataTemplate>
-        </ItemsControl.ItemTemplate>
+        </ItemsControl.DataTemplates>
       </ItemsControl>
-    </ScrollViewer>
-  </DockPanel>
+    </StackPanel>
+  </ScrollViewer>
 </UserControl>

@@ -17,14 +17,13 @@ public class NotebooksViewModelTests
         new(new Notebook(Guid.NewGuid(), title, DateTimeOffset.UtcNow), sources);
 
     [Fact]
-    public async Task Blank_name_creates_an_untitled_notebook_and_opens_it()
+    public async Task Create_makes_an_untitled_notebook_and_opens_it()
     {
         var created = new Notebook(Guid.NewGuid(), "Untitled notebook", DateTimeOffset.UtcNow);
         _notebooks.CreateAsync("Untitled notebook", Arg.Any<CancellationToken>()).Returns(created);
         Notebook? opened = null;
         var viewModel = CreateViewModel();
         viewModel.OpenRequested = notebook => { opened = notebook; return Task.CompletedTask; };
-        viewModel.NewTitle = "   ";
 
         await viewModel.CreateCommand.ExecuteAsync(null);
 
@@ -39,7 +38,8 @@ public class NotebooksViewModelTests
 
         await viewModel.LoadAsync();
 
-        viewModel.Cards.Select(c => c.Summary).ShouldBe(["1 source", "3 sources"]);
+        viewModel.Cards[0].Summary.ShouldEndWith("· 1 source");
+        viewModel.Cards[1].Summary.ShouldEndWith("· 3 sources");
         viewModel.IsEmpty.ShouldBeFalse();
     }
 

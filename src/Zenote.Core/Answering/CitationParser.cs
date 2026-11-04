@@ -17,7 +17,7 @@ public static partial class CitationParser
         {
             var valid = match.Groups["numbers"].Value
                 .Split(',', StringSplitOptions.TrimEntries)
-                .Select(int.Parse)
+                .SelectMany(Expand)
                 .Where(number => number >= 1 && number <= sources.Count)
                 .Distinct()
                 .ToList();
@@ -32,7 +32,17 @@ public static partial class CitationParser
                 : match.Groups["space"].Value + string.Concat(valid.Select(number => $"[{number}]"));
         });
 
-        return (cleaned.Trim(), citations.Values.ToList());
+        return (MarkerSeparator().Replace(cleaned, "][").Trim(), citations.Values.ToList());
+    }
+
+    // Small models sometimes write a range, like [1-6].
+    private static IEnumerable<int> Expand(string part)
+    {
+        var ends = part.Split(['-', '–'], StringSplitOptions.TrimEntries);
+        var first = int.Parse(ends[0]);
+        var last = int.Parse(ends[^1]);
+
+        return last < first ? [first] : Enumerable.Range(first, last - first + 1);
     }
 
     public static Citation ToCitation(int marker, ScoredChunk source)
@@ -43,6 +53,9 @@ public static partial class CitationParser
         return new Citation(marker, chunk.DocumentId, chunk.FileName, chunk.Page, snippet);
     }
 
-    [GeneratedRegex(@"(?<space>\s*)\[(?<numbers>\d{1,3}(?:\s*,\s*\d{1,3})*)\]")]
+    [GeneratedRegex(@"(?<space>\s*)\[(?<numbers>\d{1,3}(?:\s*[,\-–]\s*\d{1,3})*)\]")]
     private static partial Regex Marker();
+
+    [GeneratedRegex(@"\]\s*,\s*\[")]
+    private static partial Regex MarkerSeparator();
 }
