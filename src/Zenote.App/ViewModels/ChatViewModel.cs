@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Zenote.Core.Abstractions;
@@ -66,7 +68,7 @@ public sealed partial class ChatViewModel : ObservableObject
     public partial string Input { get; set; } = "";
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SendCommand), nameof(StopCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SendCommand), nameof(StopCommand), nameof(NewChatCommand))]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
     public partial bool IsAnswering { get; set; }
 
@@ -139,7 +141,7 @@ public sealed partial class ChatViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(IsIdle))]
     private Task NewChatAsync() => ShowAsync(null);
 
     [RelayCommand(CanExecute = nameof(CanSend))]
@@ -167,9 +169,11 @@ public sealed partial class ChatViewModel : ObservableObject
         {
             reply.Stop();
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            reply.Fail("Couldn't reach Ollama. Open it, then try again.");
+            reply.Fail(ex.StatusCode == HttpStatusCode.NotFound || ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase)
+                ? "That chat model isn't installed. Choose another in Settings."
+                : "Couldn't reach Ollama. Open it, then try again.");
         }
         finally
         {
@@ -273,13 +277,14 @@ public sealed partial class MessageViewModel : ObservableObject
     public partial string Text { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsThinking))]
+    [NotifyPropertyChangedFor(nameof(IsThinking), nameof(CanCopy))]
     public partial bool IsPending { get; set; }
 
     [ObservableProperty]
     public partial bool IsNotFound { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanCopy))]
     public partial bool IsFailed { get; set; }
 
     [ObservableProperty]
@@ -287,6 +292,14 @@ public sealed partial class MessageViewModel : ObservableObject
 
     [ObservableProperty]
     public partial bool IsStopped { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCopied { get; set; }
+
+    public bool CanCopy => !IsPending && !IsFailed && Text.Length > 0;
+
+    /// What the copy button puts on the clipboard. Citation numbers mean nothing outside Zenote.
+    public string CopyText => CitationMarker().Replace(Text, "");
 
     public ObservableCollection<CitationChipViewModel> Chips { get; } = [];
 
@@ -296,7 +309,11 @@ public sealed partial class MessageViewModel : ObservableObject
 
     public bool HasChips => Chips.Count > 0;
 
-    public string ChipsHeading => IsNotFound ? "Closest matches" : "Sources";
+    public string ChipsHeading => IsNotFound ? "Closest matches" : IsUnverified ? "Pages it was given" : "Sources";
+
+    public string UnverifiedText => HasChips
+        ? "The model didn't cite specific lines, so check this against the pages below."
+        : "Unverified: this answer has no citations, so check it against your sources.";
 
     public bool IsThinking => IsPending && Text.Length == 0;
 
@@ -342,11 +359,12 @@ public sealed partial class MessageViewModel : ObservableObject
 
         Text = answer.Text;
         IsNotFound = answer.NotFound;
-        IsUnverified = !answer.NotFound && answer.Citations.Count == 0;
+        IsUnverified = !answer.NotFound && answer.Citations.All(citation => citation.Marker == 0);
         IsPending = false;
 
         OnPropertyChanged(nameof(HasChips));
         OnPropertyChanged(nameof(ChipsHeading));
+        OnPropertyChanged(nameof(UnverifiedText));
     }
 
     public void Stop()
@@ -370,6 +388,9 @@ public sealed partial class MessageViewModel : ObservableObject
         IsPending = false;
         IsFailed = true;
     }
+
+    [GeneratedRegex(@"\s*\[\d+\]")]
+    private static partial Regex CitationMarker();
 }
 
 public sealed partial class CitationChipViewModel(Citation citation, Func<Citation, Task> open) : ObservableObject

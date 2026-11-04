@@ -136,6 +136,21 @@ public class NotebookViewModelTests
     }
 
     [Fact]
+    public async Task A_page_that_cannot_be_rendered_shows_a_message()
+    {
+        var document = Doc("a.pdf");
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([document]);
+        _renderer.RenderPngAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new NotSupportedException("Unexpected PDF feature"));
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+
+        await viewModel.OpenCitationAsync(new Citation(1, document.Id, "a.pdf", 1, "x"));
+
+        viewModel.Panel.Problem.ShouldBe("This page couldn't be shown.");
+    }
+
+    [Fact]
     public async Task A_citation_to_a_removed_source_still_shows_its_passage()
     {
         var viewModel = CreateViewModel();
@@ -191,6 +206,39 @@ public class NotebookViewModelTests
 
         await _indexing.Received(1).EnqueueAsync(document, Arg.Any<CancellationToken>());
         source.Status.ShouldBe(DocumentStatus.Queued);
+    }
+
+    [Fact]
+    public async Task Removing_the_source_on_screen_closes_the_viewer()
+    {
+        var document = Doc("a.pdf");
+        _documents.ListAsync(Notebook.Id, Arg.Any<CancellationToken>()).Returns([document]);
+        var viewModel = CreateViewModel();
+        await viewModel.LoadAsync();
+        await viewModel.OpenCitationAsync(new Citation(1, document.Id, "a.pdf", 1, "x"));
+
+        await viewModel.Sources[0].DeleteCommand.ExecuteAsync(null);
+
+        viewModel.Panel.IsOpen.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task The_same_problem_is_only_reported_once()
+    {
+        GivenImportReturns(Doc("a.pdf"), alreadyImported: true);
+        var viewModel = CreateViewModel();
+
+        await viewModel.ImportFilesAsync(["/tmp/a.pdf", "/tmp/a.pdf", "/tmp/a.pdf"]);
+
+        viewModel.Message.ShouldBe("a.pdf is already in this notebook.");
+    }
+
+    [Fact]
+    public void Indexing_with_no_progress_yet_does_not_show_zero_of_zero()
+    {
+        var source = new SourceItemViewModel(Doc("a.pdf") with { Status = DocumentStatus.Embedding }, CreateViewModel());
+
+        source.Summary.ShouldBe("Indexing…");
     }
 
     [Fact]

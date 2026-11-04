@@ -8,9 +8,12 @@ public sealed class UserSettings(string path)
 {
     public string Path { get; } = path;
 
+    /// False if the file exists but is damaged, in which case the app runs on its defaults.
+    public bool IsReadable => !File.Exists(Path) || Read() is not null;
+
     public void SaveChatModel(string model)
     {
-        var settings = File.Exists(Path) ? JsonNode.Parse(File.ReadAllText(Path))!.AsObject() : [];
+        var settings = Read() ?? [];
 
         if (settings["Models"] is not JsonObject models)
         {
@@ -20,5 +23,17 @@ public sealed class UserSettings(string path)
 
         models["ChatModel"] = model;
         File.WriteAllText(Path, settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private JsonObject? Read()
+    {
+        try
+        {
+            return File.Exists(Path) ? JsonNode.Parse(File.ReadAllText(Path)) as JsonObject : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 }

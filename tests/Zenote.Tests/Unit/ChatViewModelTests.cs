@@ -59,15 +59,93 @@ public class ChatViewModelTests
     }
 
     [Fact]
-    public async Task An_answer_with_no_citations_is_marked_unverified()
+    public async Task An_uncited_answer_is_flagged_and_lists_the_pages_it_was_given()
     {
         var viewModel = CreateViewModel(new FakeChatClient("Probably twenty days."));
         viewModel.Input = "How much leave?";
 
         await viewModel.SendCommand.ExecuteAsync(null);
 
-        viewModel.Messages[1].IsUnverified.ShouldBeTrue();
-        viewModel.Messages[1].HasChips.ShouldBeFalse();
+        var answer = viewModel.Messages[1];
+        answer.IsUnverified.ShouldBeTrue();
+        answer.ChipsHeading.ShouldBe("Pages it was given");
+        answer.UnverifiedText.ShouldContain("pages below");
+        answer.Chips.Single().Label.ShouldBe("a.pdf · p. 1");
+    }
+
+    [Fact]
+    public void Copying_an_answer_leaves_out_citation_numbers()
+    {
+        var message = MessageViewModel.Pending();
+
+        message.Complete(new Answer("Twenty days [1]. Five carry over [2][3].", false, []), _ => Task.CompletedTask);
+
+        message.CopyText.ShouldBe("Twenty days. Five carry over.");
+    }
+
+    [Fact]
+    public void Only_finished_answers_can_be_copied()
+    {
+        var pending = MessageViewModel.Pending();
+        pending.CanCopy.ShouldBeFalse();
+
+        pending.Complete(new Answer("Text.", false, []), _ => Task.CompletedTask);
+        pending.CanCopy.ShouldBeTrue();
+
+        var failed = MessageViewModel.Pending();
+        failed.Fail("Couldn't reach Ollama.");
+        failed.CanCopy.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task New_chat_is_unavailable_while_answering()
+    {
+        var viewModel = CreateViewModel(new FakeChatClient("Partial") { HangAfterFirstToken = true });
+        viewModel.Input = "Question";
+
+        var sending = viewModel.SendCommand.ExecuteAsync(null);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        viewModel.NewChatCommand.CanExecute(null).ShouldBeFalse();
+
+        viewModel.StopCommand.Execute(null);
+        await sending;
+        viewModel.NewChatCommand.CanExecute(null).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task A_missing_model_gets_its_own_message()
+    {
+        var answers = Substitute.For<IRagAnswerService>();
+        answers.AskAsync(Notebook, Arg.Any<string>(), Arg.Any<IReadOnlyList<ChatTurn>>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Throwing(new HttpRequestException("model 'x' not found")));
+        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { SourceCount = 1, Input = "Question" };
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        viewModel.Messages[1].Text.ShouldContain("isn't installed");
+    }
+
+    [Fact]
+    public void A_cited_answer_is_not_flagged()
+    {
+        var message = MessageViewModel.Pending();
+
+        message.Complete(new Answer("Fact [1].", false, [new Citation(1, Guid.NewGuid(), "a.pdf", 3, "x")]), _ => Task.CompletedTask);
+
+        message.IsUnverified.ShouldBeFalse();
+        message.ChipsHeading.ShouldBe("Sources");
+    }
+
+    [Fact]
+    public void An_older_saved_answer_with_no_pages_keeps_the_plain_warning()
+    {
+        var message = MessageViewModel.Pending();
+
+        message.Complete(new Answer("Fact.", false, []), _ => Task.CompletedTask);
+
+        message.IsUnverified.ShouldBeTrue();
+        message.UnverifiedText.ShouldStartWith("Unverified");
     }
 
     [Fact]
@@ -251,10 +329,10 @@ public class ChatViewModelTests
         chat.ReceivedMessages.ShouldNotContain(m => m.Text.Contains("Couldn't reach"));
     }
 
-    private static async IAsyncEnumerable<AnswerEvent> Throwing()
+    private static async IAsyncEnumerable<AnswerEvent> Throwing(Exception? exception = null)
     {
         await Task.Yield();
-        throw new HttpRequestException();
+        throw exception ?? new HttpRequestException();
 #pragma warning disable CS0162
         yield break;
 #pragma warning restore CS0162

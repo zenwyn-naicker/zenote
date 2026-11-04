@@ -46,6 +46,8 @@ public sealed partial class SourcePanelViewModel(IPageRenderer renderer) : Obser
 
     public bool HasSnippet => Snippet is not null;
 
+    public bool IsShowing(Document document) => IsOpen && _document?.Id == document.Id;
+
     public bool HasDocument => PageCount > 0;
 
     public string PageLabel => $"Page {Page} of {PageCount}";
@@ -122,8 +124,9 @@ public sealed partial class SourcePanelViewModel(IPageRenderer renderer) : Obser
                 PageImage = image;
             }
         }
-        catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentException)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
+            // PDFs can fail in many ways, and one bad page shouldn't take the app down.
             if (request == _renderRequest)
             {
                 PageImage = null;
