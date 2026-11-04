@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zenote.App.ViewModels"
+             x:Class="Zenote.App.Views.ChatView"
+             x:DataType="vm:ChatViewModel">
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" Padding="20,12" BorderBrush="#E7E5E4" BorderThickness="0,1,0,0">
+      <DockPanel>
+        <Panel DockPanel.Dock="Right" Margin="8,0,0,0" VerticalAlignment="Bottom">
+          <Button Content="Send" Command="{Binding SendCommand}" IsVisible="{Binding IsIdle}" />
+          <Button Content="Stop" Command="{Binding StopCommand}" IsVisible="{Binding IsAnswering}" />
+        </Panel>
+        <TextBox Text="{Binding Input}" PlaceholderText="Ask about your sources…" AcceptsReturn="False"
+                 TextWrapping="Wrap" MaxHeight="120">
+          <TextBox.KeyBindings>
+            <KeyBinding Gesture="Enter" Command="{Binding SendCommand}" />
+          </TextBox.KeyBindings>
+        </TextBox>
+      </DockPanel>
+    </Border>
+
+    <ScrollViewer x:Name="Scroller" Padding="20,12">
+      <ItemsControl ItemsSource="{Binding Messages}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:MessageViewModel">
+            <Panel Margin="0,6">
+              <Border IsVisible="{Binding IsUser}" HorizontalAlignment="Right" MaxWidth="520"
+                      Background="#F5F5F4" CornerRadius="12" Padding="12,8">
+                <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" />
+              </Border>
+
+              <StackPanel IsVisible="{Binding IsAssistant}" Spacing="4" MaxWidth="640" HorizontalAlignment="Left">
+                <TextBlock IsVisible="{Binding IsThinking}" Text="Reading your sources…" FontSize="13" Foreground="#78716C" />
+                <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21"
+                                     Classes.muted="{Binding IsNotFound}" Classes.failed="{Binding IsFailed}">
+                  <SelectableTextBlock.Styles>
+                    <Style Selector="SelectableTextBlock.muted">
+                      <Setter Property="Foreground" Value="#78716C" />
+                    </Style>
+                    <Style Selector="SelectableTextBlock.failed">
+                      <Setter Property="Foreground" Value="#B91C1C" />
+                    </Style>
+                  </SelectableTextBlock.Styles>
+                </SelectableTextBlock>
+              </StackPanel>
+            </Panel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

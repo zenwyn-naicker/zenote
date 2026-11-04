@@ -1,7 +1,9 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using OllamaSharp;
+using OllamaSharp.Models;
 using Zenote.Core.Abstractions;
+using Zenote.Core.Answering;
 using Zenote.Core.Chunking;
 using Zenote.Core.Documents;
 using Zenote.Core.Indexing;
@@ -25,7 +27,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(options));
         services.AddSingleton<IOllamaApiClient>(_ => new OllamaApiClient(url));
-        services.AddSingleton<IChatClient>(_ => new OllamaApiClient(url, options.ChatModel));
+        services.AddSingleton(_ => CreateChatClient(url, options));
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(url, options.EmbeddingModel));
         services.AddSingleton<IAiHealthCheck, OllamaHealthCheck>();
         services.AddSingleton(paths);
@@ -43,9 +45,20 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IIndexingQueue, IndexingQueue>();
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(new RetrievalOptions()));
         services.AddSingleton<IRetriever, Retriever>();
+        services.AddSingleton<IRagAnswerService, RagAnswerService>();
+        services.AddSingleton<IModelWarmup, ModelWarmup>();
         services.AddSingleton<IPageRenderer, PdfiumPageRenderer>();
         services.AddSingleton<ISystemCheck, SystemCheck>();
 
         return services;
     }
+
+    // Ollama silently cuts off prompts longer than its context window, so it's always set explicitly.
+    // Keeping this here means Core never needs to know about Ollama.
+    public static IChatClient CreateChatClient(Uri url, ModelOptions options) =>
+        new ChatClientBuilder(new OllamaApiClient(url, options.ChatModel))
+            .ConfigureOptions(chat => chat
+                .AddOllamaOption(OllamaOption.NumCtx, options.ChatContextTokens)
+                .AddOllamaOption(OllamaOption.Think, false))
+            .Build();
 }

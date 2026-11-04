@@ -25,7 +25,8 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         IDocumentLibrary library,
         IPdfTextExtractor extractor,
         IFilePicker filePicker,
-        IIndexingQueue indexing)
+        IIndexingQueue indexing,
+        IRagAnswerService answers)
     {
         _notebook = notebook;
         _documents = documents;
@@ -34,6 +35,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         _filePicker = filePicker;
         _indexing = indexing;
         Title = notebook.Title;
+        Chat = new ChatViewModel(notebook.Id, answers);
         _indexing.ProgressChanged += OnIndexingProgress;
     }
 
@@ -41,11 +43,14 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
 
     public string Title { get; }
 
+    public ChatViewModel Chat { get; }
+
     public ObservableCollection<SourceItemViewModel> Sources { get; } = [];
 
     public ObservableCollection<PageItemViewModel> Pages { get; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsReaderOpen))]
     public partial SourceItemViewModel? SelectedSource { get; set; }
 
     [ObservableProperty]
@@ -56,6 +61,8 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
     public partial bool IsImporting { get; set; }
 
     public bool HasMessage => Message is not null;
+
+    public bool IsReaderOpen => SelectedSource is not null;
 
     public bool HasNoSources => Sources.Count == 0;
 
@@ -98,9 +105,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
                     continue;
                 }
 
-                var source = new SourceItemViewModel(result.Document, this);
-                Sources.Add(source);
-                SelectedSource = source;
+                Sources.Add(new SourceItemViewModel(result.Document, this));
             }
             catch (PdfExtractionException ex)
             {
@@ -190,6 +195,9 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private async Task AddPdfsAsync() => await ImportFilesAsync(await _filePicker.PickPdfsAsync());
+
+    [RelayCommand]
+    private void CloseReader() => SelectedSource = null;
 
     [RelayCommand]
     private Task BackAsync() => BackRequested?.Invoke() ?? Task.CompletedTask;
