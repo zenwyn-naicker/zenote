@@ -237,6 +237,10 @@ ZENOTE_EVAL_ANSWERS=1 dotnet test --solution Zenote.slnx
 - Reading order on complex layouts depends on how the PDF was made
 - Only tested on one 16 GB Mac so far
 
+## Design
+
+The reasoning behind the main decisions is in [docs/DESIGN.md](docs/DESIGN.md). To report a security problem, see [SECURITY.md](SECURITY.md).
+
 ## Built with
 
 [.NET 10](https://dotnet.microsoft.com), [Avalonia](https://avaloniaui.net), [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet), [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/microsoft-extensions-ai), [OllamaSharp](https://github.com/awaescher/OllamaSharp), [PdfPig](https://github.com/UglyToad/PdfPig), [PDFtoImage](https://github.com/sungaila/PDFtoImage), [sqlite-vec](https://github.com/asg017/sqlite-vec) and [Ollama](https://ollama.com).
@@ -244,3 +248,7 @@ ZENOTE_EVAL_ANSWERS=1 dotnet test --solution Zenote.slnx
 Models: [Llama 3.2](https://www.llama.com) (Built with Llama) and [nomic-embed-text](https://www.nomic.ai).
 
 Planned and built with [Claude Code](https://claude.com/claude-code) as a pair programmer. Commits it helped with are marked as co-authored.
+
+## Licence
+
+[MIT](LICENSE)
