@@ -6,6 +6,7 @@ using Zenote.Core.Chunking;
 using Zenote.Core.Documents;
 using Zenote.Core.Indexing;
 using Zenote.Core.Options;
+using Zenote.Core.Retrieval;
 using Zenote.Infrastructure.Ai;
 using Zenote.Infrastructure.Pdf;
 using Zenote.Infrastructure.Persistence;
@@ -40,6 +41,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITextEmbedder, OllamaTextEmbedder>();
         services.AddSingleton<IVectorStore, SqliteVecVectorStore>();
         services.AddSingleton<IIndexingQueue, IndexingQueue>();
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(new RetrievalOptions()));
+        services.AddSingleton<IRetriever, Retriever>();
         services.AddSingleton<IPageRenderer, PdfiumPageRenderer>();
         services.AddSingleton<ISystemCheck, SystemCheck>();
 

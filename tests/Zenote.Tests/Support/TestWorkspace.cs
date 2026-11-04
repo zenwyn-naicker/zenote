@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
+using Zenote.Core.Abstractions;
 using Zenote.Core.Chunking;
 using Zenote.Core.Documents;
 using Zenote.Core.Domain;
@@ -15,13 +16,15 @@ namespace Zenote.Tests.Support;
 /// A real database and document folder in a temp directory.
 public sealed class TestWorkspace : IDisposable
 {
-    public TestWorkspace()
+    public TestWorkspace(ITextEmbedder? embedder = null, ModelOptions? models = null)
     {
+        Embedder = embedder ?? new FakeEmbedder();
+
         Paths = new AppPaths(Path.Combine(Path.GetTempPath(), $"zenote-test-{Guid.NewGuid():N}"));
         Directory.CreateDirectory(Paths.Root);
 
         Connections = new SqliteConnectionFactory(Paths.DatabasePath);
-        new DatabaseInitializer(Connections, Options.Create(new ModelOptions())).Initialize();
+        new DatabaseInitializer(Connections, Options.Create(models ?? new ModelOptions())).Initialize();
 
         Notebooks = new NotebookRepository(Connections);
         Documents = new DocumentRepository(Connections);
@@ -40,7 +43,8 @@ public sealed class TestWorkspace : IDisposable
     public NotebookRepository Notebooks { get; }
     public DocumentRepository Documents { get; }
     public SqliteVecVectorStore Vectors { get; }
-    public FakeEmbedder Embedder { get; } = new();
+    public ITextEmbedder Embedder { get; }
+    public FakeEmbedder FakeEmbedder => (FakeEmbedder)Embedder;
     public IndexingQueue Queue { get; }
     public DocumentLibrary Library { get; }
 

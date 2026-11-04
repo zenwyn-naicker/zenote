@@ -16,4 +16,7 @@
     <PackageReference Include="System.Numerics.Tensors" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

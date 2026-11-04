@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 6)
+# Zenote — Project Plan (rev 7)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,21 @@
 
 ## Status
 
-M0 and M1 are merged and tagged. **M2 is in review.** Next: M3.
+M0 to M2 are merged and tagged. **M3 is in review.** Next: M4.
+
+## What changed in rev 7 (learned in M3)
+
+- **D2b settled: keep `nomic-embed-text`.** Eval results on the 26-question set:
+
+  | Model | Hit@1 | Hit@3 | Hit@6 | MRR | Eval time | Loaded size |
+  |---|---|---|---|---|---|---|
+  | `nomic-embed-text` | 88% | 100% | 100% | 0.936 | 1.6 s | 335 MB |
+  | `qwen3-embedding:0.6b` | 88% | 100% | 100% | 0.936 | 8.8 s | 1.2 GB |
+
+- **Gate stays at 0.55:** keeps 96% of answerable questions and blocks 88% of the 8 unanswerable ones.
+- The eval corpus is 4 documents I wrote (16 pages), generated into PDFs by `TestPdfs.Paragraphs`, so nothing needs licensing.
+  It's small and synthetic: treat the numbers as a regression check, not a benchmark. Real two-column papers are still untested.
+- Skipped the debug search box. Chat replaces it in M4, and the eval covers retrieval more thoroughly.
 
 ## What changed in rev 6 (learned in M2)
 

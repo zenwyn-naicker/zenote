@@ -24,6 +24,41 @@ public static class TestPdfs
         return builder.Build();
     }
 
+    /// One PDF page per entry, wrapped like normal body text.
+    public static byte[] Paragraphs(IEnumerable<string> pages)
+    {
+        const int charsPerLine = 92;
+        var builder = new PdfDocumentBuilder();
+        var font = builder.AddStandard14Font(Standard14Font.Helvetica);
+
+        foreach (var text in pages)
+        {
+            var page = builder.AddPage(PageSize.A4);
+            var y = 790.0;
+
+            foreach (var paragraph in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var line = "";
+                foreach (var word in paragraph.Split(' '))
+                {
+                    if (line.Length + word.Length + 1 > charsPerLine)
+                    {
+                        page.AddText(line, 10, new PdfPoint(40, y), font);
+                        y -= 14;
+                        line = "";
+                    }
+
+                    line = line.Length == 0 ? word : $"{line} {word}";
+                }
+
+                page.AddText(line, 10, new PdfPoint(40, y), font);
+                y -= 24;
+            }
+        }
+
+        return builder.Build();
+    }
+
     public static byte[] TwoColumns(string[] left, string[] right)
     {
         var builder = new PdfDocumentBuilder();
