@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 7)
+# Zenote — Project Plan (rev 8)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,16 @@
 
 ## Status
 
-M0 to M2 are merged and tagged. **M3 is in review.** Next: M4.
+M0 to M3 are merged and tagged. **M4 is in review.** Next: M5.
+
+## What changed in rev 8 (learned in M4)
+
+- `IRagAnswerService.AskAsync` takes the notebook, question and history directly, so it stays stateless. Conversations are saved around it in M6.
+- `num_ctx` and `think=false` are set in Infrastructure with `ChatClientBuilder.ConfigureOptions`, so Core stays free of Ollama.
+- `keep_alive` is left at Ollama's default (5 minutes). Warm-up at launch covers the worst of the cold start.
+- The chat model comparison moves to M5, because it needs citations to score.
+- First real answers: about 2 seconds to the first word with the model loaded, and the model declined a question it knows
+  the answer to because the sources didn't say.
 
 ## What changed in rev 7 (learned in M3)
 

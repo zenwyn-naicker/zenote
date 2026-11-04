@@ -18,7 +18,7 @@ public class NotebookViewModelTests
     private readonly IIndexingQueue _indexing = Substitute.For<IIndexingQueue>();
 
     private NotebookViewModel CreateViewModel() =>
-        new(Notebook, _documents, _library, _extractor, Substitute.For<IFilePicker>(), _indexing);
+        new(Notebook, _documents, _library, _extractor, Substitute.For<IFilePicker>(), _indexing, Substitute.For<IRagAnswerService>());
 
     private static Document Doc(string name, int pages = 1, int empty = 0) => new(
         Guid.NewGuid(), Notebook.Id, name, $"/stored/{name}", "hash", pages, empty, DocumentStatus.Queued, null, DateTimeOffset.UtcNow);
@@ -28,7 +28,7 @@ public class NotebookViewModelTests
             .Returns(new ImportResult(document, alreadyImported));
 
     [Fact]
-    public async Task Imported_source_appears_and_is_selected()
+    public async Task Imported_source_appears()
     {
         GivenImportReturns(Doc("a.pdf"));
         _extractor.ExtractAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new ExtractedDocument([]));
@@ -37,7 +37,6 @@ public class NotebookViewModelTests
         await viewModel.ImportFilesAsync(["/tmp/a.pdf"]);
 
         viewModel.Sources.Single().FileName.ShouldBe("a.pdf");
-        viewModel.SelectedSource.ShouldBe(viewModel.Sources[0]);
         viewModel.HasNoSources.ShouldBeFalse();
         viewModel.IsImporting.ShouldBeFalse();
     }

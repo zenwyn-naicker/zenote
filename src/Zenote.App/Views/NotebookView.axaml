@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Zenote.App.ViewModels"
+             xmlns:views="using:Zenote.App.Views"
              x:Class="Zenote.App.Views.NotebookView"
              x:DataType="vm:NotebookViewModel"
              DragDrop.AllowDrop="True">
@@ -16,7 +17,7 @@
       <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" Foreground="#78350F" />
     </Border>
 
-    <Grid ColumnDefinitions="300,*">
+    <Grid ColumnDefinitions="280,*,Auto">
       <Border Grid.Column="0" BorderBrush="#E7E5E4" BorderThickness="0,0,1,0" Background="#FAFAF9">
         <DockPanel Margin="12">
           <DockPanel DockPanel.Dock="Top" Margin="4,0,0,10">
@@ -54,16 +55,28 @@
         </DockPanel>
       </Border>
 
-      <ListBox Grid.Column="1" ItemsSource="{Binding Pages}" Background="White" Padding="20,12">
-        <ListBox.ItemTemplate>
-          <DataTemplate x:DataType="vm:PageItemViewModel">
-            <StackPanel Spacing="6" Margin="0,6">
-              <TextBlock Text="{Binding Heading}" FontSize="12" FontWeight="SemiBold" Foreground="#78716C" />
-              <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
-            </StackPanel>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+      <views:ChatView Grid.Column="1" DataContext="{Binding Chat}" />
+
+      <Border Grid.Column="2" Width="380" IsVisible="{Binding IsReaderOpen}" BorderBrush="#E7E5E4" BorderThickness="1,0,0,0">
+        <DockPanel>
+          <DockPanel DockPanel.Dock="Top" Margin="16,10">
+            <Button DockPanel.Dock="Right" Content="✕" Command="{Binding CloseReaderCommand}" ToolTip.Tip="Close"
+                    FontSize="11" Padding="6,1" Background="Transparent" />
+            <TextBlock Text="{Binding SelectedSource.FileName, FallbackValue=''}" FontWeight="SemiBold" FontSize="13"
+                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+          </DockPanel>
+          <ListBox ItemsSource="{Binding Pages}" Background="White" Padding="8,0">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:PageItemViewModel">
+                <StackPanel Spacing="6" Margin="0,6">
+                  <TextBlock Text="{Binding Heading}" FontSize="12" FontWeight="SemiBold" Foreground="#78716C" />
+                  <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="13" LineHeight="20" />
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
     </Grid>
   </DockPanel>
 </UserControl>

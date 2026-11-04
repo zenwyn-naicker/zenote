@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageReference Include="LightStudio.sqlite-vec" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="PDFtoImage" />

@@ -12,14 +12,17 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private readonly NotebooksViewModel _notebooks;
     private readonly Func<Notebook, NotebookViewModel> _createNotebook;
     private readonly IIndexingQueue _indexing;
+    private readonly IModelWarmup _warmup;
 
     public MainWindowViewModel(
         ISystemCheck systemCheck,
         NotebooksViewModel notebooks,
         Func<Notebook, NotebookViewModel> createNotebook,
-        IIndexingQueue indexing)
+        IIndexingQueue indexing,
+        IModelWarmup warmup)
     {
         _systemCheck = systemCheck;
+        _warmup = warmup;
         _indexing = indexing;
         _notebooks = notebooks;
         _createNotebook = createNotebook;
@@ -37,6 +40,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         await _notebooks.LoadAsync();
         await _indexing.ResumeAsync(CancellationToken.None);
         await RefreshAsync(CancellationToken.None);
+        await _warmup.WarmUpAsync(CancellationToken.None);
     }
 
     [RelayCommand]
