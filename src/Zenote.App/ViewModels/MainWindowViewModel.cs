@@ -11,13 +11,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private readonly ISystemCheck _systemCheck;
     private readonly NotebooksViewModel _notebooks;
     private readonly Func<Notebook, NotebookViewModel> _createNotebook;
+    private readonly IIndexingQueue _indexing;
 
     public MainWindowViewModel(
         ISystemCheck systemCheck,
         NotebooksViewModel notebooks,
-        Func<Notebook, NotebookViewModel> createNotebook)
+        Func<Notebook, NotebookViewModel> createNotebook,
+        IIndexingQueue indexing)
     {
         _systemCheck = systemCheck;
+        _indexing = indexing;
         _notebooks = notebooks;
         _createNotebook = createNotebook;
         _notebooks.OpenRequested = OpenNotebookAsync;
@@ -32,6 +35,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public async Task StartAsync()
     {
         await _notebooks.LoadAsync();
+        await _indexing.ResumeAsync(CancellationToken.None);
         await RefreshAsync(CancellationToken.None);
     }
 
@@ -57,6 +61,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private async Task ShowNotebooksAsync()
     {
+        (CurrentPage as IDisposable)?.Dispose();
         await _notebooks.LoadAsync();
         CurrentPage = _notebooks;
     }

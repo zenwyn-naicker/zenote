@@ -38,6 +38,26 @@ public sealed class DocumentRepository(SqliteConnectionFactory connections) : ID
         return documents;
     }
 
+    public async Task<IReadOnlyList<Document>> ListUnfinishedAsync(CancellationToken ct)
+    {
+        using var connection = connections.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = $"""
+            SELECT {Columns} FROM documents
+            WHERE status IN ('Queued', 'Extracting', 'Embedding')
+            ORDER BY imported_at
+            """;
+
+        var documents = new List<Document>();
+        using var reader = await command.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            documents.Add(Read(reader));
+        }
+
+        return documents;
+    }
+
     public async Task SaveAsync(Document document, CancellationToken ct)
     {
         using var connection = connections.Open();
@@ -63,13 +83,100 @@ public sealed class DocumentRepository(SqliteConnectionFactory connections) : ID
         transaction.Commit();
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken ct)
+    public async Task UpdateStatusAsync(Guid id, DocumentStatus status, string? error, CancellationToken ct)
     {
         using var connection = connections.Open();
         using var command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM documents WHERE id = $id";
+        command.CommandText = "UPDATE documents SET status = $status, error = $error WHERE id = $id";
+        command.Parameters.AddWithValue("$id", id.ToString());
+        command.Parameters.AddWithValue("$status", status.ToString());
+        command.Parameters.AddWithValue("$error", (object?)error ?? DBNull.Value);
+        await command.ExecuteNonQueryAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<long>> InsertChunksAsync(Guid documentId, IReadOnlyList<ChunkDraft> chunks, CancellationToken ct)
+    {
+        using var connection = connections.Open();
+        using var transaction = connection.BeginTransaction();
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            INSERT INTO chunks(document_id, page, ordinal, text) VALUES ($document, $page, $ordinal, $text);
+            SELECT last_insert_rowid();
+            """;
+        command.Parameters.AddWithValue("$document", documentId.ToString());
+        var page = command.Parameters.Add("$page", SqliteType.Integer);
+        var ordinal = command.Parameters.Add("$ordinal", SqliteType.Integer);
+        var text = command.Parameters.Add("$text", SqliteType.Text);
+
+        var ids = new List<long>(chunks.Count);
+        foreach (var chunk in chunks)
+        {
+            page.Value = chunk.Page;
+            ordinal.Value = chunk.Ordinal;
+            text.Value = chunk.Text;
+            ids.Add((long)(await command.ExecuteScalarAsync(ct))!);
+        }
+
+        transaction.Commit();
+        return ids;
+    }
+
+    public async Task<IReadOnlyList<Chunk>> GetChunksAsync(IReadOnlyList<long> ids, CancellationToken ct)
+    {
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        using var connection = connections.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = $"""
+            SELECT c.id, c.document_id, d.file_name, c.page, c.text
+            FROM chunks c
+            JOIN documents d ON d.id = c.document_id
+            WHERE c.id IN ({string.Join(",", ids)})
+            """;
+
+        var chunks = new Dictionary<long, Chunk>();
+        using var reader = await command.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            var id = reader.GetInt64(0);
+            chunks[id] = new Chunk(id, Guid.Parse(reader.GetString(1)), reader.GetString(2), reader.GetInt32(3), reader.GetString(4));
+        }
+
+        return ids.Where(chunks.ContainsKey).Select(id => chunks[id]).ToList();
+    }
+
+    public async Task DeleteChunksAsync(Guid documentId, CancellationToken ct)
+    {
+        using var connection = connections.Open();
+        using var transaction = connection.BeginTransaction();
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            DELETE FROM vec_chunks WHERE rowid IN (SELECT id FROM chunks WHERE document_id = $id);
+            DELETE FROM chunks WHERE document_id = $id;
+            """;
+        command.Parameters.AddWithValue("$id", documentId.ToString());
+        await command.ExecuteNonQueryAsync(ct);
+        transaction.Commit();
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct)
+    {
+        using var connection = connections.Open();
+        using var transaction = connection.BeginTransaction();
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            DELETE FROM vec_chunks WHERE rowid IN (SELECT id FROM chunks WHERE document_id = $id);
+            DELETE FROM documents WHERE id = $id;
+            """;
         command.Parameters.AddWithValue("$id", id.ToString());
         await command.ExecuteNonQueryAsync(ct);
+        transaction.Commit();
     }
 
     private static Document Read(SqliteDataReader reader) => new(

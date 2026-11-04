@@ -38,7 +38,12 @@
                           FontSize="11" Padding="6,1" Background="Transparent" VerticalAlignment="Top" />
                   <StackPanel Spacing="2">
                     <TextBlock Text="{Binding FileName}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="#78716C" />
+                    <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="#78716C" TextWrapping="Wrap" />
+                    <ProgressBar IsVisible="{Binding IsIndexing}" Value="{Binding ProgressPercent}" Height="3" MinHeight="3" Margin="0,3" />
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <Button IsVisible="{Binding IsIndexing}" Content="Cancel" Command="{Binding CancelCommand}" FontSize="11" Padding="8,1" />
+                      <Button IsVisible="{Binding CanRetry}" Content="Retry" Command="{Binding RetryCommand}" FontSize="11" Padding="8,1" />
+                    </StackPanel>
                     <TextBlock IsVisible="{Binding LooksScanned}" FontSize="12" Foreground="#B45309" TextWrapping="Wrap"
                                Text="Looks scanned. Text search won't work." />
                   </StackPanel>

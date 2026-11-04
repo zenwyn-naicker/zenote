@@ -21,6 +21,7 @@
     <PackageVersion Include="PDFtoImage" Version="5.4.0" />
     <PackageVersion Include="PdfPig" Version="0.1.16" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="System.Numerics.Tensors" Version="10.0.14" />
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
   </ItemGroup>
 </Project>

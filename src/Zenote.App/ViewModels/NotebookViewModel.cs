@@ -7,18 +7,39 @@ using Zenote.Core.Domain;
 
 namespace Zenote.App.ViewModels;
 
-public sealed partial class NotebookViewModel(
-    Notebook notebook,
-    IDocumentRepository documents,
-    IDocumentLibrary library,
-    IPdfTextExtractor extractor,
-    IFilePicker filePicker) : ObservableObject
+public sealed partial class NotebookViewModel : ObservableObject, IDisposable
 {
+    private readonly Notebook _notebook;
+    private readonly IDocumentRepository _documents;
+    private readonly IDocumentLibrary _library;
+    private readonly IPdfTextExtractor _extractor;
+    private readonly IFilePicker _filePicker;
+    private readonly IIndexingQueue _indexing;
+    private readonly SynchronizationContext? _uiContext = SynchronizationContext.Current;
+
     private int _pagesRequest;
+
+    public NotebookViewModel(
+        Notebook notebook,
+        IDocumentRepository documents,
+        IDocumentLibrary library,
+        IPdfTextExtractor extractor,
+        IFilePicker filePicker,
+        IIndexingQueue indexing)
+    {
+        _notebook = notebook;
+        _documents = documents;
+        _library = library;
+        _extractor = extractor;
+        _filePicker = filePicker;
+        _indexing = indexing;
+        Title = notebook.Title;
+        _indexing.ProgressChanged += OnIndexingProgress;
+    }
 
     public Func<Task>? BackRequested { get; set; }
 
-    public string Title { get; } = notebook.Title;
+    public string Title { get; }
 
     public ObservableCollection<SourceItemViewModel> Sources { get; } = [];
 
@@ -40,7 +61,7 @@ public sealed partial class NotebookViewModel(
 
     public async Task LoadAsync()
     {
-        var items = await documents.ListAsync(notebook.Id, CancellationToken.None);
+        var items = await _documents.ListAsync(_notebook.Id, CancellationToken.None);
 
         Sources.Clear();
         foreach (var document in items)
@@ -69,7 +90,7 @@ public sealed partial class NotebookViewModel(
 
             try
             {
-                var result = await library.ImportAsync(notebook.Id, path, CancellationToken.None);
+                var result = await _library.ImportAsync(_notebook.Id, path, CancellationToken.None);
 
                 if (result.AlreadyImported)
                 {
@@ -108,7 +129,7 @@ public sealed partial class NotebookViewModel(
 
         try
         {
-            var extracted = await extractor.ExtractAsync(source.Document.StoredPath, CancellationToken.None);
+            var extracted = await _extractor.ExtractAsync(source.Document.StoredPath, CancellationToken.None);
 
             // Another source may have been selected while this one was being read.
             if (request != _pagesRequest)
@@ -129,7 +150,7 @@ public sealed partial class NotebookViewModel(
 
     internal async Task DeleteSourceAsync(SourceItemViewModel source)
     {
-        await library.DeleteDocumentAsync(source.Document, CancellationToken.None);
+        await _library.DeleteDocumentAsync(source.Document, CancellationToken.None);
 
         Sources.Remove(source);
         if (SelectedSource == source)
@@ -140,10 +161,35 @@ public sealed partial class NotebookViewModel(
         OnPropertyChanged(nameof(HasNoSources));
     }
 
+    internal Task CancelIndexingAsync(SourceItemViewModel source) => _indexing.CancelAsync(source.Document.Id);
+
+    internal async Task RetryIndexingAsync(SourceItemViewModel source)
+    {
+        source.Apply(new IndexingProgress(source.Document.Id, DocumentStatus.Queued, 0, 0));
+        await _indexing.EnqueueAsync(source.Document, CancellationToken.None);
+    }
+
+    public void Dispose() => _indexing.ProgressChanged -= OnIndexingProgress;
+
+    private void OnIndexingProgress(object? sender, IndexingProgress progress)
+    {
+        if (_uiContext is null)
+        {
+            Apply(progress);
+        }
+        else
+        {
+            _uiContext.Post(_ => Apply(progress), null);
+        }
+    }
+
+    private void Apply(IndexingProgress progress) =>
+        Sources.FirstOrDefault(source => source.Document.Id == progress.DocumentId)?.Apply(progress);
+
     partial void OnSelectedSourceChanged(SourceItemViewModel? value) => _ = ShowPagesAsync(value);
 
     [RelayCommand]
-    private async Task AddPdfsAsync() => await ImportFilesAsync(await filePicker.PickPdfsAsync());
+    private async Task AddPdfsAsync() => await ImportFilesAsync(await _filePicker.PickPdfsAsync());
 
     [RelayCommand]
     private Task BackAsync() => BackRequested?.Invoke() ?? Task.CompletedTask;
@@ -151,13 +197,60 @@ public sealed partial class NotebookViewModel(
 
 public sealed partial class SourceItemViewModel(Document document, NotebookViewModel parent) : ObservableObject
 {
+    private readonly string _pageSummary = document.PageCount == 1 ? "1 page" : $"{document.PageCount} pages";
+
     public Document Document { get; } = document;
     public string FileName { get; } = document.FileName;
-    public string Summary { get; } = document.PageCount == 1 ? "1 page" : $"{document.PageCount} pages";
     public bool LooksScanned { get; } = document.LooksScanned;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Summary), nameof(IsIndexing), nameof(CanRetry))]
+    public partial DocumentStatus Status { get; set; } = document.Status;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Summary), nameof(ProgressPercent))]
+    public partial int Completed { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Summary), nameof(ProgressPercent))]
+    public partial int Total { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Summary))]
+    public partial string? Error { get; set; } = document.Error;
+
+    public bool IsIndexing => Status is DocumentStatus.Queued or DocumentStatus.Extracting or DocumentStatus.Embedding;
+
+    public bool CanRetry => Status is DocumentStatus.Failed or DocumentStatus.Cancelled;
+
+    public double ProgressPercent => Total == 0 ? 0 : 100.0 * Completed / Total;
+
+    public string Summary => Status switch
+    {
+        DocumentStatus.Queued => "Waiting…",
+        DocumentStatus.Extracting => "Reading…",
+        DocumentStatus.Embedding => $"Indexing {Completed} of {Total}",
+        DocumentStatus.Failed => Error ?? "Indexing failed.",
+        DocumentStatus.Cancelled => "Indexing cancelled.",
+        _ => _pageSummary,
+    };
+
+    public void Apply(IndexingProgress progress)
+    {
+        Status = progress.Stage;
+        Completed = progress.Completed;
+        Total = progress.Total;
+        Error = progress.Error;
+    }
 
     [RelayCommand]
     private Task DeleteAsync() => parent.DeleteSourceAsync(this);
+
+    [RelayCommand]
+    private Task CancelAsync() => parent.CancelIndexingAsync(this);
+
+    [RelayCommand]
+    private Task RetryAsync() => parent.RetryIndexingAsync(this);
 }
 
 public sealed class PageItemViewModel(ExtractedPage page)

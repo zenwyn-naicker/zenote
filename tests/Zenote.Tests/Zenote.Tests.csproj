@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Numerics.Tensors" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 </Project>
