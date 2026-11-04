@@ -1,14 +1,18 @@
 using Avalonia;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Zenote.App.Services;
 using Zenote.App.ViewModels;
 using Zenote.Core.Abstractions;
+using Zenote.Core.Domain;
 using Zenote.Core.Options;
 using Zenote.Infrastructure;
+using Zenote.Infrastructure.Persistence;
+using Zenote.Infrastructure.Storage;
 
 namespace Zenote.App;
 
-internal static class Program
+public static class Program
 {
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -16,6 +20,7 @@ internal static class Program
     public static int Main(string[] args)
     {
         Services = BuildServices();
+        Services.GetRequiredService<DatabaseInitializer>().Initialize();
 
         if (args.Contains("--self-check"))
         {
@@ -42,10 +47,21 @@ internal static class Program
         var models = configuration.GetSection("Models").Get<ModelOptions>() ?? new ModelOptions();
 
         return new ServiceCollection()
-            .AddZenoteInfrastructure(models)
-            .AddTransient<MainWindowViewModel>()
+            .AddZenoteInfrastructure(models, AppPaths.Default)
+            .AddZenoteViewModels()
             .BuildServiceProvider();
     }
+
+    public static IServiceCollection AddZenoteViewModels(this IServiceCollection services) => services
+        .AddSingleton<IFilePicker, AvaloniaFilePicker>()
+        .AddSingleton<NotebooksViewModel>()
+        .AddTransient<MainWindowViewModel>()
+        .AddSingleton<Func<Notebook, NotebookViewModel>>(provider => notebook => new NotebookViewModel(
+            notebook,
+            provider.GetRequiredService<IDocumentRepository>(),
+            provider.GetRequiredService<IDocumentLibrary>(),
+            provider.GetRequiredService<IPdfTextExtractor>(),
+            provider.GetRequiredService<IFilePicker>()));
 
     // Prints the same checks as the status bar, so a published build can be tested without the UI.
     private static int RunSelfCheck()

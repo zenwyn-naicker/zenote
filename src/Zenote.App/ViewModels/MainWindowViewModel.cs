@@ -2,23 +2,63 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Zenote.Core.Abstractions;
+using Zenote.Core.Domain;
 
 namespace Zenote.App.ViewModels;
 
-public sealed partial class MainWindowViewModel(ISystemCheck systemCheck) : ObservableObject
+public sealed partial class MainWindowViewModel : ObservableObject
 {
+    private readonly ISystemCheck _systemCheck;
+    private readonly NotebooksViewModel _notebooks;
+    private readonly Func<Notebook, NotebookViewModel> _createNotebook;
+
+    public MainWindowViewModel(
+        ISystemCheck systemCheck,
+        NotebooksViewModel notebooks,
+        Func<Notebook, NotebookViewModel> createNotebook)
+    {
+        _systemCheck = systemCheck;
+        _notebooks = notebooks;
+        _createNotebook = createNotebook;
+        _notebooks.OpenRequested = OpenNotebookAsync;
+        CurrentPage = notebooks;
+    }
+
+    [ObservableProperty]
+    public partial ObservableObject CurrentPage { get; set; }
+
     public ObservableCollection<CheckItemViewModel> Checks { get; } = [];
+
+    public async Task StartAsync()
+    {
+        await _notebooks.LoadAsync();
+        await RefreshAsync(CancellationToken.None);
+    }
 
     [RelayCommand]
     private async Task RefreshAsync(CancellationToken ct)
     {
-        var results = await systemCheck.RunAsync(ct);
+        var results = await _systemCheck.RunAsync(ct);
 
         Checks.Clear();
         foreach (var result in results)
         {
             Checks.Add(new CheckItemViewModel(result));
         }
+    }
+
+    private async Task OpenNotebookAsync(Notebook notebook)
+    {
+        var page = _createNotebook(notebook);
+        page.BackRequested = ShowNotebooksAsync;
+        await page.LoadAsync();
+        CurrentPage = page;
+    }
+
+    private async Task ShowNotebooksAsync()
+    {
+        await _notebooks.LoadAsync();
+        CurrentPage = _notebooks;
     }
 }
 

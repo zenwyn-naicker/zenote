@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zenote.App.ViewModels"
+             x:Class="Zenote.App.Views.NotebookView"
+             x:DataType="vm:NotebookViewModel"
+             DragDrop.AllowDrop="True">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Padding="16,12" BorderBrush="#E7E5E4" BorderThickness="0,0,0,1">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Button Content="‹ Notebooks" Command="{Binding BackCommand}" FontSize="12" Padding="10,3" />
+        <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <Border DockPanel.Dock="Top" IsVisible="{Binding HasMessage}" Background="#FEF3C7" Padding="16,8">
+      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" Foreground="#78350F" />
+    </Border>
+
+    <Grid ColumnDefinitions="300,*">
+      <Border Grid.Column="0" BorderBrush="#E7E5E4" BorderThickness="0,0,1,0" Background="#FAFAF9">
+        <DockPanel Margin="12">
+          <DockPanel DockPanel.Dock="Top" Margin="4,0,0,10">
+            <Button DockPanel.Dock="Right" Content="Add PDFs" Command="{Binding AddPdfsCommand}" FontSize="12" Padding="10,3" />
+            <TextBlock Text="Sources" FontWeight="SemiBold" VerticalAlignment="Center" />
+          </DockPanel>
+
+          <TextBlock DockPanel.Dock="Top" IsVisible="{Binding IsImporting}" Text="Reading PDF…"
+                     FontSize="13" Foreground="#78716C" Margin="4,0,0,8" />
+
+          <TextBlock DockPanel.Dock="Top" IsVisible="{Binding HasNoSources}" TextWrapping="Wrap" Margin="4,8"
+                     FontSize="13" Foreground="#78716C" Text="Drop PDFs here, or use Add PDFs." />
+
+          <ListBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}" Background="Transparent">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:SourceItemViewModel">
+                <DockPanel>
+                  <Button DockPanel.Dock="Right" Content="✕" Command="{Binding DeleteCommand}" ToolTip.Tip="Remove source"
+                          FontSize="11" Padding="6,1" Background="Transparent" VerticalAlignment="Top" />
+                  <StackPanel Spacing="2">
+                    <TextBlock Text="{Binding FileName}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="#78716C" />
+                    <TextBlock IsVisible="{Binding LooksScanned}" FontSize="12" Foreground="#B45309" TextWrapping="Wrap"
+                               Text="Looks scanned. Text search won't work." />
+                  </StackPanel>
+                </DockPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+
+      <ListBox Grid.Column="1" ItemsSource="{Binding Pages}" Background="White" Padding="20,12">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:PageItemViewModel">
+            <StackPanel Spacing="6" Margin="0,6">
+              <TextBlock Text="{Binding Heading}" FontSize="12" FontWeight="SemiBold" Foreground="#78716C" />
+              <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+  </DockPanel>
+</UserControl>
