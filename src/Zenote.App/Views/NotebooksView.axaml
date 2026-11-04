@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zenote.App.ViewModels"
+             x:Class="Zenote.App.Views.NotebooksView"
+             x:DataType="vm:NotebooksViewModel">
+  <DockPanel Margin="40,32">
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,24">
+      <TextBlock Text="Zenote" FontSize="30" FontWeight="SemiBold" />
+      <TextBlock Text="Let your documents talk." FontSize="14" Foreground="#78716C" />
+    </StackPanel>
+
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,24" MaxWidth="480" HorizontalAlignment="Left">
+      <Button DockPanel.Dock="Right" Content="New notebook" Command="{Binding CreateCommand}" Margin="8,0,0,0" />
+      <TextBox Text="{Binding NewTitle}" PlaceholderText="Notebook name" MinWidth="280">
+        <TextBox.KeyBindings>
+          <KeyBinding Gesture="Enter" Command="{Binding CreateCommand}" />
+        </TextBox.KeyBindings>
+      </TextBox>
+    </DockPanel>
+
+    <TextBlock DockPanel.Dock="Top" IsVisible="{Binding IsEmpty}" Foreground="#78716C"
+               Text="Create your first notebook, then add PDFs to it." />
+
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Cards}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:NotebookCardViewModel">
+            <Border Width="260" Height="132" Margin="0,0,16,16" Padding="16,14" CornerRadius="10"
+                    Background="#FAFAF9" BorderBrush="#E7E5E4" BorderThickness="1">
+              <Panel>
+                <DockPanel IsVisible="{Binding IsIdle}">
+                  <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="6">
+                    <Button Content="Open" Command="{Binding OpenCommand}" FontSize="12" Padding="10,3" />
+                    <Button Content="Rename" Command="{Binding StartRenameCommand}" FontSize="12" Padding="10,3" />
+                    <Button Content="Delete" Command="{Binding StartDeleteCommand}" FontSize="12" Padding="10,3" />
+                  </StackPanel>
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Summary}" FontSize="13" Foreground="#78716C" />
+                  </StackPanel>
+                </DockPanel>
+
+                <StackPanel IsVisible="{Binding IsRenaming}" Spacing="10">
+                  <TextBox Text="{Binding EditTitle}">
+                    <TextBox.KeyBindings>
+                      <KeyBinding Gesture="Enter" Command="{Binding SaveRenameCommand}" />
+                    </TextBox.KeyBindings>
+                  </TextBox>
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button Content="Save" Command="{Binding SaveRenameCommand}" FontSize="12" Padding="10,3" />
+                    <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="12" Padding="10,3" />
+                  </StackPanel>
+                </StackPanel>
+
+                <StackPanel IsVisible="{Binding IsConfirmingDelete}" Spacing="10">
+                  <TextBlock Text="{Binding DeletePrompt}" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" FontSize="13" />
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button Content="Delete" Command="{Binding ConfirmDeleteCommand}" FontSize="12" Padding="10,3"
+                            Foreground="#B91C1C" />
+                    <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="12" Padding="10,3" />
+                  </StackPanel>
+                </StackPanel>
+              </Panel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

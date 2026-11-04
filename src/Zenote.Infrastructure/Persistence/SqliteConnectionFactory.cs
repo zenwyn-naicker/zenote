@@ -13,6 +13,11 @@ public sealed class SqliteConnectionFactory(string databasePath)
         connection.EnableExtensions(true);
         connection.LoadExtension(FindVecLibrary(), VecEntryPoint);
         connection.EnableExtensions(false);
+
+        using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA foreign_keys = ON";
+        command.ExecuteNonQuery();
+
         return connection;
     }
 

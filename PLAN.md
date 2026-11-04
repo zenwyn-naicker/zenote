@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 4)
+# Zenote — Project Plan (rev 5)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,15 @@
 
 ## Status
 
-**M0 complete on branch `m0-scaffold`** (4 Nov 2026). Next: M1.
+**M0 merged and tagged `m0`** (4 Nov 2026). **M1 built on branch `m1-notebooks`**. Next: M2.
+
+## What changed in rev 5 (learned in M1)
+
+- Fixture PDFs are **built in code** by `TestPdfs` (PdfPig's writer), so the repo has no binary fixtures to license.
+  Real papers still come in with the M3 eval corpus, which is where two-column reading order gets its real test.
+- Extracted text isn't stored yet: pages are re-read from the PDF when a source is selected. M2 stores chunks.
+- After import a document stays `Queued` until M2 adds indexing.
+- Schema changes go through `DatabaseInitializer` migrations, tracked with SQLite's `user_version`, not the `meta` table.
 
 ## What changed in rev 4 (learned in M0)
 

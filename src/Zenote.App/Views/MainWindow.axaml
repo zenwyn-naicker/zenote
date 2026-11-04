@@ -1,11 +1,21 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Zenote.App.ViewModels"
+        xmlns:views="using:Zenote.App.Views"
         x:Class="Zenote.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Zenote"
         Width="1000" Height="680" MinWidth="640" MinHeight="420"
         Background="White">
+  <Window.DataTemplates>
+    <DataTemplate DataType="vm:NotebooksViewModel">
+      <views:NotebooksView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:NotebookViewModel">
+      <views:NotebookView />
+    </DataTemplate>
+  </Window.DataTemplates>
+
   <DockPanel>
     <Border DockPanel.Dock="Bottom" Background="#F5F5F4" BorderBrush="#E7E5E4" BorderThickness="0,1,0,0" Padding="12,6">
       <DockPanel>
@@ -29,9 +39,6 @@
       </DockPanel>
     </Border>
 
-    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
-      <TextBlock Text="Zenote" FontSize="36" FontWeight="SemiBold" HorizontalAlignment="Center" />
-      <TextBlock Text="Let your documents talk." FontSize="15" Foreground="#78716C" HorizontalAlignment="Center" />
-    </StackPanel>
+    <ContentControl Content="{Binding CurrentPage}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
   </DockPanel>
 </Window>
