@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Zenote.Core\Zenote.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="LightStudio.sqlite-vec" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="OllamaSharp" />
+    <PackageReference Include="PDFtoImage" />
+    <PackageReference Include="PdfPig" />
+  </ItemGroup>
+</Project>
