@@ -1,0 +1,37 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Zenote.App.ViewModels"
+        x:Class="Zenote.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Zenote"
+        Width="1000" Height="680" MinWidth="640" MinHeight="420"
+        Background="White">
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F5F5F4" BorderBrush="#E7E5E4" BorderThickness="0,1,0,0" Padding="12,6">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Check again" Command="{Binding RefreshCommand}" FontSize="12" Padding="8,2" />
+        <ItemsControl ItemsSource="{Binding Checks}" VerticalAlignment="Center">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:CheckItemViewModel">
+              <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,16,0" ToolTip.Tip="{Binding Detail}">
+                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="#166534" IsVisible="{Binding Ok}" />
+                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="#B91C1C" IsVisible="{Binding Failed}" />
+                <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="#78716C" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </DockPanel>
+    </Border>
+
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+      <TextBlock Text="Zenote" FontSize="36" FontWeight="SemiBold" HorizontalAlignment="Center" />
+      <TextBlock Text="Let your documents talk." FontSize="15" Foreground="#78716C" HorizontalAlignment="Center" />
+    </StackPanel>
+  </DockPanel>
+</Window>

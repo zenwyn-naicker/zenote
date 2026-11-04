@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Zenote.App/Zenote.App.csproj" />
+    <Project Path="src/Zenote.Core/Zenote.Core.csproj" />
+    <Project Path="src/Zenote.Infrastructure/Zenote.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Zenote.Tests/Zenote.Tests.csproj" />
+  </Folder>
+</Solution>

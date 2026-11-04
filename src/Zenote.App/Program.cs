@@ -1,0 +1,62 @@
+using Avalonia;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Zenote.App.ViewModels;
+using Zenote.Core.Abstractions;
+using Zenote.Core.Options;
+using Zenote.Infrastructure;
+
+namespace Zenote.App;
+
+internal static class Program
+{
+    public static IServiceProvider Services { get; private set; } = null!;
+
+    [STAThread]
+    public static int Main(string[] args)
+    {
+        Services = BuildServices();
+
+        if (args.Contains("--self-check"))
+        {
+            return RunSelfCheck();
+        }
+
+        return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
+
+    // Used by the Avalonia previewer as well as Main.
+    public static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace();
+
+    private static ServiceProvider BuildServices()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+
+        var models = configuration.GetSection("Models").Get<ModelOptions>() ?? new ModelOptions();
+
+        return new ServiceCollection()
+            .AddZenoteInfrastructure(models)
+            .AddTransient<MainWindowViewModel>()
+            .BuildServiceProvider();
+    }
+
+    // Prints the same checks as the status bar, so a published build can be tested without the UI.
+    private static int RunSelfCheck()
+    {
+        var results = Services.GetRequiredService<ISystemCheck>().RunAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+        foreach (var result in results)
+        {
+            Console.WriteLine($"{(result.Ok ? "ok  " : "FAIL")} {result.Name} {result.Detail}".TrimEnd());
+        }
+
+        return results.All(r => r.Ok) ? 0 : 1;
+    }
+}
