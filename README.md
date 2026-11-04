@@ -6,7 +6,7 @@
 
 <p align="center"><strong>Let your documents talk.</strong><br>
 Ask your PDFs questions and get answers that show the exact page they came from.<br>
-Free, and everything stays on your Mac.</p>
+Free, powered by local AI through Ollama, and everything stays on your Mac.</p>
 
 <p align="center">
   <a href="https://github.com/zenwyn-naicker/zenote/releases/latest/download/Zenote.dmg"><strong>Download for Mac</strong></a>
