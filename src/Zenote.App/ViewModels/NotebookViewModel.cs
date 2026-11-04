@@ -141,6 +141,10 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
             {
                 problems.Add($"{ex.Message} It may be damaged or password-protected.");
             }
+            catch (FileTooLargeException ex)
+            {
+                problems.Add(ex.Message);
+            }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
                 problems.Add($"Couldn't open {name}.");

@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 12)
+# Zenote — Project Plan (rev 13)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -14,6 +14,15 @@
 M0 to M7 are merged and tagged. Next: your testing and feedback.
 
 An answer with no valid citations now lists the pages the model was given, so it can still be checked.
+
+## What changed in rev 13 (release readiness)
+
+- **Setup needs no Terminal:** the banner offers Open Ollama and Download models, with progress.
+- **Installer:** `scripts/package-macos.sh` now builds `Zenote.dmg`. Notarising needs a paid Apple account, so first launch needs the Open Anyway steps.
+- **Privacy:** the data folder is private to the user, cloud models are left out of the model list, and a non-local Ollama address triggers a warning.
+- **Untrusted PDFs:** a 500 MB limit, and the prompt says to ignore instructions inside sources.
+- **Reliability:** models stay loaded for 30 minutes, Ollama requests never time out, and a stuck Ollama can't stall the health check.
+- Measured and left alone: database connections (0.05 ms), search (49 ms over 50,000 chunks) and PDF reading (0.8 s for 500 pages).
 
 ## What changed in rev 12 (from the deep test)
 

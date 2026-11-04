@@ -80,7 +80,7 @@ public sealed class ModelPickerTests : IDisposable
     }
 
     [Fact]
-    public async Task Embedding_models_are_not_offered()
+    public async Task Embedding_and_cloud_models_are_not_offered()
     {
         var client = Substitute.For<IOllamaApiClient>();
         client.ListLocalModelsAsync(Arg.Any<CancellationToken>()).Returns(
@@ -88,6 +88,7 @@ public sealed class ModelPickerTests : IDisposable
             new Model { Name = "nomic-embed-text:latest" },
             new Model { Name = "llama3.2:latest" },
             new Model { Name = "qwen3.5:4b" },
+            new Model { Name = "gpt-oss:120b-cloud" },
         ]);
         var chat = new SwitchableChatClient(_ => new FakeChatClient(), "llama3.2");
 

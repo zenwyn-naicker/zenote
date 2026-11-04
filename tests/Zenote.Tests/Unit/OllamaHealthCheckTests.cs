@@ -41,6 +41,16 @@ public class OllamaHealthCheckTests
     }
 
     [Fact]
+    public async Task A_stuck_Ollama_counts_as_unreachable()
+    {
+        _client.ListLocalModelsAsync(Arg.Any<CancellationToken>()).ThrowsAsync(new TaskCanceledException());
+
+        var health = await CreateCheck().CheckAsync(TestContext.Current.CancellationToken);
+
+        health.Reachable.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task Reports_unreachable_when_Ollama_is_not_running()
     {
         _client.ListLocalModelsAsync(Arg.Any<CancellationToken>()).ThrowsAsync(new HttpRequestException());

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds an Apple Silicon Zenote.app and a zip of it in build/.
+# Builds an Apple Silicon Zenote.app and a Zenote.dmg installer in build/.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -17,5 +17,12 @@ cp assets/Zenote.icns "$app/Contents/Resources/Zenote.icns"
 # Ad-hoc signing lets the bundled native libraries load on Apple Silicon.
 codesign --force --deep --sign - "$app"
 
-ditto -c -k --keepParent "$app" build/Zenote-macos-arm64.zip
-echo "Built $app"
+# The disk image shows the app beside an Applications shortcut, so installing is one drag.
+stage="build/dmg"
+mkdir -p "$stage"
+cp -R "$app" "$stage/"
+ln -s /Applications "$stage/Applications"
+hdiutil create -quiet -volname "Zenote" -srcfolder "$stage" -ov -format UDZO build/Zenote.dmg
+rm -rf "$stage"
+
+echo "Built $app and build/Zenote.dmg"
