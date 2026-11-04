@@ -28,6 +28,7 @@ public sealed class TestWorkspace : IDisposable
 
         Notebooks = new NotebookRepository(Connections);
         Documents = new DocumentRepository(Connections);
+        Conversations = new ConversationRepository(Connections);
         Vectors = new SqliteVecVectorStore(Connections);
         Queue = new IndexingQueue(
             new PdfPigTextExtractor(),
@@ -42,6 +43,7 @@ public sealed class TestWorkspace : IDisposable
     public SqliteConnectionFactory Connections { get; }
     public NotebookRepository Notebooks { get; }
     public DocumentRepository Documents { get; }
+    public ConversationRepository Conversations { get; }
     public SqliteVecVectorStore Vectors { get; }
     public ITextEmbedder Embedder { get; }
     public FakeEmbedder FakeEmbedder => (FakeEmbedder)Embedder;

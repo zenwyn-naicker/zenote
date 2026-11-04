@@ -18,7 +18,7 @@ public class NotebookViewModelTests
     private readonly IIndexingQueue _indexing = Substitute.For<IIndexingQueue>();
 
     private NotebookViewModel CreateViewModel() =>
-        new(Notebook, _documents, _library, Substitute.For<IFilePicker>(), _indexing, Substitute.For<IRagAnswerService>(), _renderer);
+        new(Notebook, _documents, _library, Substitute.For<IFilePicker>(), _indexing, Substitute.For<IRagAnswerService>(), _renderer, Substitute.For<IConversationRepository>());
 
     private static Document Doc(string name, int pages = 1, int empty = 0) => new(
         Guid.NewGuid(), Notebook.Id, name, $"/stored/{name}", "hash", pages, empty, DocumentStatus.Queued, null, DateTimeOffset.UtcNow);

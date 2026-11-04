@@ -13,6 +13,11 @@ public class ChatViewModelTests
     private static readonly Guid Notebook = Guid.NewGuid();
 
     private readonly IRetriever _retriever = Substitute.For<IRetriever>();
+    private readonly IConversationRepository _conversations = Substitute.For<IConversationRepository>();
+
+    public ChatViewModelTests() =>
+        _conversations.CreateAsync(Notebook, Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(call => new Conversation(Guid.NewGuid(), Notebook, call.ArgAt<string>(1), DateTimeOffset.UtcNow));
 
     private ChatViewModel CreateViewModel(FakeChatClient chat)
     {
@@ -20,7 +25,7 @@ public class ChatViewModelTests
         _retriever.RetrieveAsync(Notebook, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new RetrievalResult([chunk], true));
 
-        return new ChatViewModel(Notebook, new RagAnswerService(_retriever, chat));
+        return new ChatViewModel(Notebook, new RagAnswerService(_retriever, chat), _conversations);
     }
 
     [Fact]
@@ -79,6 +84,76 @@ public class ChatViewModelTests
     }
 
     [Fact]
+    public async Task The_first_question_starts_a_titled_conversation()
+    {
+        var viewModel = CreateViewModel(new FakeChatClient("Answer [1]."));
+        viewModel.Input = "How much leave do I get?";
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        viewModel.Conversations.Single().Title.ShouldBe("How much leave do I get?");
+        viewModel.SelectedConversation.ShouldBe(viewModel.Conversations[0]);
+        await _conversations.Received(2).AppendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Long_first_questions_are_shortened_for_the_title()
+    {
+        var viewModel = CreateViewModel(new FakeChatClient("Answer [1]."));
+        viewModel.Input = new string('a', 100);
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        viewModel.Conversations.Single().Title.Length.ShouldBe(61);
+    }
+
+    [Fact]
+    public async Task Later_questions_stay_in_the_same_conversation()
+    {
+        var viewModel = CreateViewModel(new FakeChatClient("Answer [1]."));
+        viewModel.Input = "First";
+        await viewModel.SendCommand.ExecuteAsync(null);
+        viewModel.Input = "Second";
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        viewModel.Conversations.Count.ShouldBe(1);
+        viewModel.Messages.Count.ShouldBe(4);
+    }
+
+    [Fact]
+    public async Task New_chat_clears_the_screen_and_starts_fresh_on_the_next_question()
+    {
+        var chat = new FakeChatClient("Answer [1].");
+        var viewModel = CreateViewModel(chat);
+        viewModel.Input = "First";
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        await viewModel.NewChatCommand.ExecuteAsync(null);
+        viewModel.Messages.ShouldBeEmpty();
+
+        viewModel.Input = "Unrelated";
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        viewModel.Conversations.Count.ShouldBe(2);
+        chat.ReceivedMessages.ShouldNotContain(m => m.Text == "First");
+    }
+
+    [Fact]
+    public async Task Failed_replies_are_not_saved()
+    {
+        var answers = Substitute.For<IRagAnswerService>();
+        answers.AskAsync(Notebook, Arg.Any<string>(), Arg.Any<IReadOnlyList<ChatTurn>>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Throwing());
+        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { Input = "Question" };
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        await _conversations.Received(1).AppendMessageAsync(
+            Arg.Is<Message>(m => m.Role == MessageRole.User), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public void Blank_questions_cannot_be_sent()
     {
         var viewModel = CreateViewModel(new FakeChatClient());
@@ -124,7 +199,7 @@ public class ChatViewModelTests
         var answers = Substitute.For<IRagAnswerService>();
         answers.AskAsync(Notebook, Arg.Any<string>(), Arg.Any<IReadOnlyList<ChatTurn>>(), Arg.Any<CancellationToken>())
             .Returns(_ => Throwing());
-        var viewModel = new ChatViewModel(Notebook, answers) { Input = "Question" };
+        var viewModel = new ChatViewModel(Notebook, answers, _conversations) { Input = "Question" };
 
         await viewModel.SendCommand.ExecuteAsync(null);
 

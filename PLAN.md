@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 8)
+# Zenote — Project Plan (rev 9)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,14 @@
 
 ## Status
 
-M0 to M3 are merged and tagged. **M4 is in review.** Next: M5.
+M0 to M4 are merged and tagged. **M5 and M6 are in review.** Next: M7.
+
+## What changed in rev 9 (learned in M5 and M6)
+
+- Selecting a source and clicking a citation now open the **same panel**, showing the rendered page. It replaces M1's plain-text page list.
+- Citation markers the model invents are removed, and `[1, 2]` becomes `[1][2]`.
+- Citations are stored as JSON on each message, with their own snippet, so old chats still work after a source is deleted.
+- Messages use a `sequence` column for ordering, because timestamps can tie.
 
 ## What changed in rev 8 (learned in M4)
 

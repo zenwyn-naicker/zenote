@@ -63,7 +63,8 @@ public static class Program
             provider.GetRequiredService<IFilePicker>(),
             provider.GetRequiredService<IIndexingQueue>(),
             provider.GetRequiredService<IRagAnswerService>(),
-            provider.GetRequiredService<IPageRenderer>()));
+            provider.GetRequiredService<IPageRenderer>(),
+            provider.GetRequiredService<IConversationRepository>()));
 
     // Prints the same checks as the status bar, so a published build can be tested without the UI.
     private static int RunSelfCheck()

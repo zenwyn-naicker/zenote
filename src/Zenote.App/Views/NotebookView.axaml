@@ -24,7 +24,8 @@
 
     <Grid ColumnDefinitions="280,*,Auto">
       <Border Grid.Column="0" BorderBrush="#E7E5E4" BorderThickness="0,0,1,0" Background="#FAFAF9">
-        <DockPanel Margin="12">
+        <Grid RowDefinitions="*,Auto,*">
+        <DockPanel Grid.Row="0" Margin="12">
           <DockPanel DockPanel.Dock="Top" Margin="4,0,0,10">
             <Button DockPanel.Dock="Right" Content="Add PDFs" Command="{Binding AddPdfsCommand}" FontSize="12" Padding="10,3" />
             <TextBlock Text="Sources" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -58,6 +59,38 @@
             </ListBox.ItemTemplate>
           </ListBox>
         </DockPanel>
+
+          <Border Grid.Row="1" Height="1" Background="#E7E5E4" />
+
+          <DockPanel Grid.Row="2" Margin="12" DataContext="{Binding Chat}" x:DataType="vm:ChatViewModel">
+            <DockPanel DockPanel.Dock="Top" Margin="4,0,0,10">
+              <Button DockPanel.Dock="Right" Content="New chat" Command="{Binding NewChatCommand}" IsEnabled="{Binding IsIdle}" FontSize="12" Padding="10,3" />
+              <TextBlock Text="Chats" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </DockPanel>
+
+            <ListBox ItemsSource="{Binding Conversations}" SelectedItem="{Binding SelectedConversation}"
+                     IsEnabled="{Binding IsIdle}" Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ConversationItemViewModel">
+                  <Panel>
+                    <DockPanel IsVisible="{Binding !IsRenaming}">
+                      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                        <Button Content="✎" Command="{Binding StartRenameCommand}" ToolTip.Tip="Rename chat" FontSize="11" Padding="5,1" Background="Transparent" />
+                        <Button Content="✕" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete chat" FontSize="11" Padding="5,1" Background="Transparent" />
+                      </StackPanel>
+                      <TextBlock Text="{Binding Title}" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBox IsVisible="{Binding IsRenaming}" Text="{Binding EditTitle}" FontSize="13">
+                      <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding SaveRenameCommand}" />
+                      </TextBox.KeyBindings>
+                    </TextBox>
+                  </Panel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Grid>
       </Border>
 
       <views:ChatView Grid.Column="1" DataContext="{Binding Chat}" />

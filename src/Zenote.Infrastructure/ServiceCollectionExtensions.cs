@@ -35,6 +35,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<DatabaseInitializer>();
         services.AddSingleton<INotebookRepository, NotebookRepository>();
         services.AddSingleton<IDocumentRepository, DocumentRepository>();
+        services.AddSingleton<IConversationRepository, ConversationRepository>();
         services.AddSingleton<IDocumentFileStore, DocumentFileStore>();
         services.AddSingleton<IDocumentLibrary, DocumentLibrary>();
         services.AddSingleton<IPdfTextExtractor, PdfPigTextExtractor>();
