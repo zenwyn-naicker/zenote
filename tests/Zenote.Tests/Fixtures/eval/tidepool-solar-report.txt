@@ -1,0 +1,12 @@
+Tidepool Community Solar Pilot: Final Report. This report summarises an eighteen-month pilot that installed rooftop solar and shared batteries in 140 homes in the Tidepool neighbourhood. The project ran from March 2024 to August 2025 and was funded by a R12.4 million grant from the Coastal Energy Trust.
+Goals. The pilot set out to reduce household electricity bills by a quarter and to keep lights on during scheduled power cuts.
+=== page ===
+Installation. Each home received a 3.2 kW rooftop array. Four shared battery banks of 100 kWh each were placed at the community hall and at three street-corner cabinets. Installation took eleven weeks and was carried out by a team of nine local apprentices, seven of whom have since qualified as electricians.
+The main delay came from roof strength surveys: 17 homes needed structural repairs before panels could be fitted.
+=== page ===
+Results. Average household bills fell by 31 percent, beating the 25 percent target. During power cuts the shared batteries kept essential circuits running for an average of 5.6 hours. Total generation over the pilot was 1,420 MWh.
+Household satisfaction reached 92 percent in the final survey. The most common complaint concerned the mobile app, which often showed stale data during cuts.
+Inverter failures were the main technical problem: 11 of the 140 inverters were replaced under warranty, mostly because of salt corrosion near the coast.
+=== page ===
+Lessons and recommendations. Marine-grade enclosures should be standard within two kilometres of the sea. Roof surveys must happen before budgets are finalised. A shared battery works best when a resident committee agrees priorities for each neighbourhood in advance.
+Next steps. The Trust has approved a second phase covering 600 homes in Ocean View, starting in 2026, at an estimated cost of R47 million.

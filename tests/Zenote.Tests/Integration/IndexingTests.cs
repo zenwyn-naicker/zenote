@@ -63,7 +63,7 @@ public sealed class IndexingTests : IDisposable
     [Fact]
     public async Task Failed_indexing_records_the_reason_and_leaves_nothing_behind()
     {
-        _workspace.Embedder.FailWith = new HttpRequestException();
+        _workspace.FakeEmbedder.FailWith = new HttpRequestException();
         var notebook = await NewNotebookAsync();
 
         var document = await _workspace.ImportAndWaitAsync(notebook, "a.pdf", _pdf, DocumentStatus.Failed);
@@ -77,10 +77,10 @@ public sealed class IndexingTests : IDisposable
     [Fact]
     public async Task Retry_after_a_failure_succeeds()
     {
-        _workspace.Embedder.FailWith = new HttpRequestException();
+        _workspace.FakeEmbedder.FailWith = new HttpRequestException();
         var notebook = await NewNotebookAsync();
         var document = await _workspace.ImportAndWaitAsync(notebook, "a.pdf", _pdf, DocumentStatus.Failed);
-        _workspace.Embedder.FailWith = null;
+        _workspace.FakeEmbedder.FailWith = null;
 
         var ready = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _workspace.Queue.ProgressChanged += (_, p) => { if (p.Stage == DocumentStatus.Ready) ready.TrySetResult(); };
@@ -93,10 +93,10 @@ public sealed class IndexingTests : IDisposable
     [Fact]
     public async Task Cancelling_mid_document_clears_its_chunks()
     {
-        _workspace.Embedder.Gate = new TaskCompletionSource();
+        _workspace.FakeEmbedder.Gate = new TaskCompletionSource();
         var notebook = await NewNotebookAsync();
         var result = await _workspace.Library.ImportAsync(notebook, _workspace.WriteFile("a.pdf", _pdf), _ct);
-        await _workspace.Embedder.Entered.Task.WaitAsync(TimeSpan.FromSeconds(20), _ct);
+        await _workspace.FakeEmbedder.Entered.Task.WaitAsync(TimeSpan.FromSeconds(20), _ct);
 
         await _workspace.Queue.CancelAsync(result.Document.Id);
 
@@ -107,10 +107,10 @@ public sealed class IndexingTests : IDisposable
     [Fact]
     public async Task Deleting_a_source_while_it_indexes_is_safe()
     {
-        _workspace.Embedder.Gate = new TaskCompletionSource();
+        _workspace.FakeEmbedder.Gate = new TaskCompletionSource();
         var notebook = await NewNotebookAsync();
         var result = await _workspace.Library.ImportAsync(notebook, _workspace.WriteFile("a.pdf", _pdf), _ct);
-        await _workspace.Embedder.Entered.Task.WaitAsync(TimeSpan.FromSeconds(20), _ct);
+        await _workspace.FakeEmbedder.Entered.Task.WaitAsync(TimeSpan.FromSeconds(20), _ct);
 
         await _workspace.Library.DeleteDocumentAsync(result.Document, _ct);
 

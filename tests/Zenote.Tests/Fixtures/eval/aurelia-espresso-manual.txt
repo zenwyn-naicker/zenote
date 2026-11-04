@@ -1,0 +1,13 @@
+Aurelia Pro 2 Espresso Machine User Manual. Thank you for choosing the Aurelia Pro 2. Read this manual before first use. The machine has a 2.1 litre water tank, a dual boiler and a pressure gauge on the front panel. Keep it on a flat, heat-resistant surface with 15 cm of clearance behind it.
+First use. Fill the tank with filtered water, switch on, and wait about twelve minutes for the machine to reach brewing temperature. Run two full tanks through the group head and the steam wand before making any drinks.
+=== page ===
+Brewing espresso. Use 18 grams of finely ground coffee for a double shot. Tamp firmly and evenly. A good extraction takes 25 to 30 seconds and should yield about 36 grams of liquid in the cup. The pressure gauge should read close to 9 bar while brewing.
+If the shot runs too fast, grind finer. If it runs too slowly or only drips, grind coarser.
+Steaming milk. Purge the wand for two seconds first. Keep the tip just under the surface until the milk reaches about 60 degrees Celsius. Wipe the wand with a damp cloth immediately after use.
+=== page ===
+Cleaning and care. Backflush the group head with the blind basket once a week, using one teaspoon of Aurelia cleaning powder. Soak the portafilter and baskets in hot water once a month.
+Descaling. Descale every three months if you use hard water, or every six months with filtered water. Use only citric-acid based descaler, mixed at 30 grams per litre. Never use vinegar, because it damages the boiler seals and voids your warranty.
+Replace the water filter cartridge every sixty days.
+=== page ===
+Troubleshooting. Error E04 means the water tank is empty or the float is stuck. Refill the tank and reseat it firmly. Error E11 means the boiler probe has overheated: switch off, wait thirty minutes and restart. Error E27 means a pump fault, and needs a service technician.
+Warranty. The Aurelia Pro 2 has a 24-month warranty on parts and labour, provided that it is registered within 60 days of purchase. Wear items such as group gaskets and shower screens are not covered. For service, call 0800 555 019 on weekdays between 08:00 and 17:00.
