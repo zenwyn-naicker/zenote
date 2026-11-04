@@ -124,23 +124,24 @@
   </Style>
 
   <Style Selector="Button.send">
-    <Setter Property="Width" Value="34" />
-    <Setter Property="Height" Value="34" />
+    <Setter Property="Width" Value="30" />
+    <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="CornerRadius" Value="17" />
+    <Setter Property="CornerRadius" Value="15" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Background" Value="{StaticResource TextBrush}" />
     <Setter Property="Foreground" Value="White" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
+  <!-- PathIcon stretches a shape to fill its box, so these are the sizes as drawn. -->
   <Style Selector="Button.send PathIcon">
-    <Setter Property="Width" Value="16" />
-    <Setter Property="Height" Value="16" />
+    <Setter Property="Width" Value="12" />
+    <Setter Property="Height" Value="12" />
   </Style>
   <Style Selector="Button.send PathIcon.stop">
-    <Setter Property="Width" Value="14" />
-    <Setter Property="Height" Value="14" />
+    <Setter Property="Width" Value="9" />
+    <Setter Property="Height" Value="9" />
   </Style>
   <Style Selector="Button.send:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="#3C4043" />

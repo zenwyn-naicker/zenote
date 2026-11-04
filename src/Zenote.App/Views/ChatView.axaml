@@ -47,7 +47,7 @@
 
     <StackPanel DockPanel.Dock="Bottom" Margin="24,8,24,12" Spacing="8" MaxWidth="760">
       <Border CornerRadius="24" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
-              Background="{StaticResource SurfaceBrush}" Padding="20,7,7,7">
+              Background="{StaticResource SurfaceBrush}" Padding="20,8,8,8">
         <DockPanel>
           <Panel DockPanel.Dock="Right" VerticalAlignment="Bottom">
             <Button Classes="send" Command="{Binding SendCommand}" IsVisible="{Binding IsIdle}" ToolTip.Tip="Send">
