@@ -22,7 +22,7 @@
       <Button DockPanel.Dock="Left" Classes="icon" Command="{Binding BackCommand}" ToolTip.Tip="All notebooks" Margin="0,0,8,0">
         <PathIcon Data="{StaticResource IconBack}" />
       </Button>
-      <TextBox x:Name="TitleBox" Classes="bare" Text="{Binding Title}" FontSize="19" FontWeight="Medium"
+      <TextBox x:Name="TitleBox" Classes="bare" Text="{Binding Title}" FontSize="19" FontWeight="Medium" MaxLength="100"
                Margin="0,0,60,0" VerticalAlignment="Center" />
     </DockPanel>
 

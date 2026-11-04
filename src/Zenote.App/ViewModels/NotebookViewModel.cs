@@ -148,7 +148,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         }
 
         IsImporting = false;
-        Message = problems.Count == 0 ? null : string.Join(" ", problems);
+        Message = problems.Count == 0 ? null : string.Join(" ", problems.Distinct());
     }
 
     public async Task SaveTitleAsync()
@@ -188,7 +188,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         await _library.DeleteDocumentAsync(source.Document, CancellationToken.None);
 
         Sources.Remove(source);
-        if (SelectedSource == source)
+        if (Panel.IsShowing(source.Document))
         {
             Panel.Close();
         }
@@ -276,7 +276,7 @@ public sealed partial class SourceItemViewModel(Document document, NotebookViewM
     {
         DocumentStatus.Queued => "Waiting…",
         DocumentStatus.Extracting => "Reading…",
-        DocumentStatus.Embedding => $"Indexing {Completed} of {Total}",
+        DocumentStatus.Embedding => Total == 0 ? "Indexing…" : $"Indexing {Completed} of {Total}",
         DocumentStatus.Failed => Error ?? "Indexing failed.",
         DocumentStatus.Cancelled => "Indexing cancelled.",
         _ => _pageSummary,

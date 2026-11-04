@@ -52,6 +52,27 @@ public sealed class SettingsViewModelTests : IDisposable
         viewModel.ConnectionText.ShouldContain("Not running");
     }
 
+    [Theory]
+    [InlineData("{ this is not json")]
+    [InlineData("[1, 2, 3]")]
+    public void A_damaged_settings_file_is_detected_and_replaced_on_save(string damaged)
+    {
+        File.WriteAllText(_path, damaged);
+        var settings = new UserSettings(_path);
+
+        settings.IsReadable.ShouldBeFalse();
+
+        settings.SaveChatModel("llama3.2");
+
+        settings.IsReadable.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Having_no_settings_file_is_fine()
+    {
+        new UserSettings(_path).IsReadable.ShouldBeTrue();
+    }
+
     [Fact]
     public void Shows_the_search_model()
     {

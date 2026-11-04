@@ -102,6 +102,68 @@ public class RagAnswerServiceTests
     }
 
     [Fact]
+    public async Task An_answer_with_no_citations_keeps_every_page_it_was_given()
+    {
+        GivenRetrieval(true, Chunk(1, "a"), Chunk(2, "b"), Chunk(3, "c"), Chunk(4, "d"));
+
+        var events = await AskAsync(new FakeChatClient("An answer with no markers."));
+
+        Final(events).Citations.Select(c => c.Page).ShouldBe([1, 2, 3, 4]);
+        Final(events).Citations.ShouldAllBe(c => c.Marker == 0);
+    }
+
+    [Theory]
+    [InlineData("The lecturer is not explicitly stated in the provided sources.")]
+    [InlineData("The sources don't contain that information.")]
+    [InlineData("There is no information about the lecturer.")]
+    public async Task A_short_uncited_decline_counts_as_not_found(string reply)
+    {
+        GivenRetrieval(true, Chunk(1, "text"));
+
+        Final(await AskAsync(new FakeChatClient(reply))).NotFound.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task A_cited_answer_that_mentions_not_found_words_stays_an_answer()
+    {
+        GivenRetrieval(true, Chunk(1, "text"));
+
+        var answer = Final(await AskAsync(new FakeChatClient("Alcohol is not included in expenses [1].")));
+
+        answer.NotFound.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task A_long_uncited_answer_is_not_mistaken_for_a_decline()
+    {
+        GivenRetrieval(true, Chunk(1, "text"));
+        var reply = "The policy covers several things and alcohol is not included. " + new string('x', 200);
+
+        Final(await AskAsync(new FakeChatClient(reply))).NotFound.ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData("[3] handbook.pdf, page 3 [3]")]
+    [InlineData("handbook.pdf, page 3")]
+    public async Task A_reply_that_only_repeats_a_source_label_counts_as_not_found(string reply)
+    {
+        GivenRetrieval(true, Chunk(1, "a"), Chunk(2, "b"), Chunk(3, "c"));
+
+        Final(await AskAsync(new FakeChatClient(reply))).NotFound.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Source_labels_are_removed_from_real_answers()
+    {
+        GivenRetrieval(true, Chunk(1, "a"), Chunk(2, "b"));
+
+        var answer = Final(await AskAsync(new FakeChatClient("[2] handbook.pdf, page 2 Staff get twenty days.")));
+
+        answer.Text.ShouldBe("[2]  Staff get twenty days.");
+        answer.Citations.Single().Page.ShouldBe(2);
+    }
+
+    [Fact]
     public async Task An_empty_reply_counts_as_not_found()
     {
         GivenRetrieval(true, Chunk(1, "text"));

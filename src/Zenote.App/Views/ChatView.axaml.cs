@@ -1,14 +1,18 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Zenote.App.ViewModels;
 
 namespace Zenote.App.Views;
 
 public partial class ChatView : UserControl
 {
+    private static readonly TimeSpan CopiedTickDuration = TimeSpan.FromSeconds(1.5);
+
     public ChatView()
     {
         InitializeComponent();
@@ -35,5 +39,20 @@ public partial class ChatView : UserControl
                 Scroller.ScrollToEnd();
             }
         };
+    }
+
+    private async void OnCopyClicked(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is not MessageViewModel message ||
+            TopLevel.GetTopLevel(this)?.Clipboard is not { } clipboard)
+        {
+            return;
+        }
+
+        await clipboard.SetTextAsync(message.CopyText);
+
+        message.IsCopied = true;
+        await Task.Delay(CopiedTickDuration);
+        message.IsCopied = false;
     }
 }

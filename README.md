@@ -16,7 +16,7 @@ Group PDFs into notebooks, ask questions in plain language, and get streamed ans
 - **Streamed answers**: grounded only in your sources, and you can stop them at any time
 - **Clickable citations**: inline numbers and file-and-page chips open the rendered PDF page
 - **Honest "not found"**: when your sources don't cover a question, Zenote says so and shows the closest matches
-- **Saved conversations**: follow-up questions work, and chats survive a restart
+- **Saved conversations**: follow-up questions work, chats survive a restart, and any message copies in one click
 - **Scanned PDF warning**: image-only documents are flagged rather than silently failing
 
 ## How it works
@@ -39,7 +39,7 @@ The design choices that matter most:
 
 - **Chunks never cross pages.** Each chunk is about 400 tokens with 15% overlap, split at paragraph and sentence breaks. Staying inside a page means every citation points to exactly one page.
 - **Two layers of grounding.** A relevance gate skips the model when nothing retrieved is close enough. If the model is called, it's told to answer only from numbered sources, or to reply with a signal that the app turns into "not found".
-- **Citations are validated.** Source numbers the model invents are removed, and an answer with no valid citation is labelled unverified.
+- **Citations are validated.** Source numbers the model invents are removed. An answer with no valid citation is flagged and lists the pages the model was given, so it can still be checked.
 - **Follow-ups without an extra model call.** Search uses the previous question plus the new one, which avoids a slow query-rewriting step on a small model.
 
 ### Architecture

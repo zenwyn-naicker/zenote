@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Zenote.App.Services;
@@ -21,6 +22,7 @@ public static class Program
     {
         Services = BuildServices();
         Services.GetRequiredService<DatabaseInitializer>().Initialize();
+        Dispatcher.UIThread.UnhandledException += OnUnhandledException;
 
         if (args.Contains("--self-check"))
         {
@@ -41,11 +43,16 @@ public static class Program
 
     private static ServiceProvider BuildServices()
     {
-        var configuration = new ConfigurationBuilder()
+        var builder = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false)
-            .AddJsonFile(UserSettingsPath, optional: true)
-            .Build();
+            .AddJsonFile("appsettings.json", optional: false);
+
+        if (new UserSettings(UserSettingsPath).IsReadable)
+        {
+            builder.AddJsonFile(UserSettingsPath, optional: true);
+        }
+
+        var configuration = builder.Build();
 
         var models = configuration.GetSection("Models").Get<ModelOptions>() ?? new ModelOptions();
 
@@ -72,6 +79,16 @@ public static class Program
             provider.GetRequiredService<IPageRenderer>(),
             provider.GetRequiredService<IConversationRepository>(),
             provider.GetRequiredService<INotebookRepository>()));
+
+    // Keeps the app open after an unexpected error, and leaves a record of what went wrong.
+    private static void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        File.AppendAllText(
+            Path.Combine(AppPaths.Default.Root, "errors.log"),
+            $"{DateTimeOffset.Now:O}{Environment.NewLine}{e.Exception}{Environment.NewLine}{Environment.NewLine}");
+
+        e.Handled = true;
+    }
 
     // Prints the same checks as the status bar, so a published build can be tested without the UI.
     private static int RunSelfCheck()

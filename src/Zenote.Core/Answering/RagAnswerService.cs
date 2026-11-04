@@ -1,16 +1,18 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.AI;
 using Zenote.Core.Abstractions;
 using Zenote.Core.Domain;
 
 namespace Zenote.Core.Answering;
 
-public sealed class RagAnswerService(IRetriever retriever, IChatClient chat) : IRagAnswerService
+public sealed partial class RagAnswerService(IRetriever retriever, IChatClient chat) : IRagAnswerService
 {
     public const string NotFoundText = "I couldn't find this in your documents.";
 
     private const int ClosestMatchCount = 3;
+    private const int ShortAnswerLength = 160;
 
     public async IAsyncEnumerable<AnswerEvent> AskAsync(
         Guid notebookId,
@@ -62,8 +64,19 @@ public sealed class RagAnswerService(IRetriever retriever, IChatClient chat) : I
             yield break;
         }
 
-        var (cleaned, citations) = CitationParser.Parse(answer, retrieval.Chunks);
-        yield return new AnswerCompleted(new Answer(cleaned, NotFound: false, citations));
+        var (cleaned, citations) = CitationParser.Parse(RemoveSourceLabels(answer, retrieval.Chunks), retrieval.Chunks);
+
+        if (!HasWords(cleaned) || (citations.Count == 0 && IsNonAnswer(cleaned)))
+        {
+            yield return NotFound(retrieval.Chunks);
+            yield break;
+        }
+
+        // With no citations, the pages the model was given are still the best way to check its answer.
+        yield return new AnswerCompleted(new Answer(
+            cleaned,
+            NotFound: false,
+            citations.Count > 0 ? citations : Unnumbered(retrieval.Chunks)));
     }
 
     // Follow-ups like "what about the second one?" mean little alone. Searching with the previous
@@ -83,9 +96,29 @@ public sealed class RagAnswerService(IRetriever retriever, IChatClient chat) : I
                sofar.StartsWith(PromptBuilder.NotFoundSignal, StringComparison.Ordinal);
     }
 
+    // Small models often decline in their own words instead of using the signal.
+    private static bool IsNonAnswer(string answer) =>
+        answer.Length <= ShortAnswerLength && DeclinedInOwnWords().IsMatch(answer);
+
+    // Small models sometimes repeat a source's heading from the prompt, like "[3] a.pdf, page 3".
+    private static string RemoveSourceLabels(string answer, IReadOnlyList<ScoredChunk> sources) =>
+        sources.Aggregate(answer, (text, source) =>
+            text.Replace($"{source.Chunk.FileName}, page {source.Chunk.Page}", "", StringComparison.OrdinalIgnoreCase));
+
+    private static bool HasWords(string answer) => CitationMarker().Replace(answer, "").Any(char.IsLetterOrDigit);
+
     private static AnswerCompleted NotFound(IReadOnlyList<ScoredChunk> chunks) =>
         new(new Answer(
             NotFoundText,
             NotFound: true,
-            chunks.Take(ClosestMatchCount).Select(chunk => CitationParser.ToCitation(0, chunk)).ToList()));
+            Unnumbered(chunks.Take(ClosestMatchCount))));
+
+    private static List<Citation> Unnumbered(IEnumerable<ScoredChunk> chunks) =>
+        chunks.Select(chunk => CitationParser.ToCitation(0, chunk)).ToList();
+
+    [GeneratedRegex(@"(\bnot\b|n't\b|\bno\b).{0,40}\b(stated|mentioned|provided|specified|included|contain|information|found)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex DeclinedInOwnWords();
+
+    [GeneratedRegex(@"\[\d+\]")]
+    private static partial Regex CitationMarker();
 }

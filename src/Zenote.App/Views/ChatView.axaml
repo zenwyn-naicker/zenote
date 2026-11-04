@@ -59,7 +59,7 @@
           </Panel>
           <TextBlock DockPanel.Dock="Right" Text="{Binding SourcesLabel}" FontSize="12" Foreground="{StaticResource FaintBrush}"
                      VerticalAlignment="Center" Margin="12,0" />
-          <TextBox Classes="bare" Text="{Binding Input}" PlaceholderText="{Binding InputHint}" AcceptsReturn="False"
+          <TextBox Classes="bare" Text="{Binding Input}" PlaceholderText="{Binding InputHint}" AcceptsReturn="False" MaxLength="4000"
                    TextWrapping="Wrap" MaxHeight="120" FontSize="14">
             <TextBox.KeyBindings>
               <KeyBinding Gesture="Enter" Command="{Binding SendCommand}" />
@@ -91,11 +91,19 @@
         <ItemsControl ItemsSource="{Binding Messages}" MaxWidth="760" Margin="24,4">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:MessageViewModel">
-              <Panel Margin="0,10">
-                <Border IsVisible="{Binding IsUser}" HorizontalAlignment="Right" MaxWidth="560"
-                        Background="{StaticResource UserBubbleBrush}" CornerRadius="18,18,4,18" Padding="16,10">
-                  <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
-                </Border>
+              <Panel Classes="message" Background="Transparent" Margin="0,4">
+                <StackPanel IsVisible="{Binding IsUser}" HorizontalAlignment="Right" Spacing="2">
+                  <Border HorizontalAlignment="Right" MaxWidth="560"
+                          Background="{StaticResource UserBubbleBrush}" CornerRadius="18,18,4,18" Padding="16,10">
+                    <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
+                  </Border>
+                  <Button Classes="icon small copy" Click="OnCopyClicked" HorizontalAlignment="Right" ToolTip.Tip="Copy">
+                    <Panel>
+                      <PathIcon Data="{StaticResource IconCopy}" IsVisible="{Binding !IsCopied}" />
+                      <PathIcon Data="{StaticResource IconCheck}" IsVisible="{Binding IsCopied}" Foreground="#1E8E3E" />
+                    </Panel>
+                  </Button>
+                </StackPanel>
 
                 <StackPanel IsVisible="{Binding IsAssistant}" Spacing="8" HorizontalAlignment="Left">
                   <TextBlock IsVisible="{Binding IsThinking}" Text="Reading your sources…" Classes="muted" />
@@ -114,7 +122,7 @@
                   <TextBlock IsVisible="{Binding IsStopped}" Text="Stopped" FontSize="12" Foreground="{StaticResource FaintBrush}" />
 
                   <TextBlock IsVisible="{Binding IsUnverified}" FontSize="12" Foreground="{StaticResource WarningBrush}"
-                             Text="Unverified: this answer has no citations, so check it against your sources." TextWrapping="Wrap" />
+                             Text="{Binding UnverifiedText}" TextWrapping="Wrap" />
 
                   <StackPanel IsVisible="{Binding HasChips}" Spacing="6">
                     <TextBlock Text="{Binding ChipsHeading}" FontSize="12" Foreground="{StaticResource FaintBrush}" />
@@ -133,6 +141,13 @@
                       </ItemsControl.ItemTemplate>
                     </ItemsControl>
                   </StackPanel>
+
+                  <Button Classes="icon small copy" Click="OnCopyClicked" IsVisible="{Binding CanCopy}" ToolTip.Tip="Copy" Margin="0,-4,0,0" HorizontalAlignment="Left">
+                    <Panel>
+                      <PathIcon Data="{StaticResource IconCopy}" IsVisible="{Binding !IsCopied}" />
+                      <PathIcon Data="{StaticResource IconCheck}" IsVisible="{Binding IsCopied}" Foreground="#1E8E3E" />
+                    </Panel>
+                  </Button>
                 </StackPanel>
               </Panel>
             </DataTemplate>

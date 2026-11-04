@@ -1,4 +1,4 @@
-# Zenote — Project Plan (rev 11)
+# Zenote — Project Plan (rev 12)
 
 > **Zenote** (zen + note): a simpler, cleaner, fully local take on NotebookLM for macOS.
 > Group PDFs into notebooks and chat with them using local retrieval-augmented generation,
@@ -11,7 +11,17 @@
 
 ## Status
 
-M0 to M6 are merged and tagged. **M7 is in review.** Next: your testing and feedback.
+M0 to M7 are merged and tagged. Next: your testing and feedback.
+
+An answer with no valid citations now lists the pages the model was given, so it can still be checked.
+
+## What changed in rev 12 (from the deep test)
+
+- A damaged `settings.json` is now skipped at launch and replaced on the next save. It used to stop the app starting.
+- Small models' own declines ("not stated in the sources") and echoed source labels are handled as "not found" or removed.
+- Deleting a source closes the viewer if it's showing, a missing model gets its own message, and New chat is unavailable during an answer.
+- Questions are limited to 4,000 characters and notebook titles to 100.
+- Unexpected UI errors are written to `errors.log` in the data folder, and the app stays open.
 
 ## What changed in rev 11 (from hands-on testing)
 
