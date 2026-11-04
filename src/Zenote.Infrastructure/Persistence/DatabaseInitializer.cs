@@ -40,6 +40,25 @@ public sealed class DatabaseInitializer(SqliteConnectionFactory connections, IOp
 
         CREATE INDEX chunks_document ON chunks(document_id);
         """,
+        """
+        CREATE TABLE conversations(
+          id TEXT PRIMARY KEY,
+          notebook_id TEXT NOT NULL REFERENCES notebooks(id) ON DELETE CASCADE,
+          title TEXT NOT NULL,
+          updated_at TEXT NOT NULL);
+
+        CREATE TABLE messages(
+          sequence INTEGER PRIMARY KEY,
+          id TEXT NOT NULL UNIQUE,
+          conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+          role TEXT NOT NULL,
+          content TEXT NOT NULL,
+          not_found INT NOT NULL,
+          citations_json TEXT NOT NULL,
+          created_at TEXT NOT NULL);
+
+        CREATE INDEX messages_conversation ON messages(conversation_id);
+        """,
     ];
 
     public void Initialize()

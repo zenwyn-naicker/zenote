@@ -23,7 +23,8 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         IFilePicker filePicker,
         IIndexingQueue indexing,
         IRagAnswerService answers,
-        IPageRenderer pageRenderer)
+        IPageRenderer pageRenderer,
+        IConversationRepository conversations)
     {
         _notebook = notebook;
         _documents = documents;
@@ -31,7 +32,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         _filePicker = filePicker;
         _indexing = indexing;
         Title = notebook.Title;
-        Chat = new ChatViewModel(notebook.Id, answers) { OpenCitation = OpenCitationAsync };
+        Chat = new ChatViewModel(notebook.Id, answers, conversations) { OpenCitation = OpenCitationAsync };
         Panel = new SourcePanelViewModel(pageRenderer);
         Panel.PropertyChanged += (_, e) =>
         {
@@ -78,6 +79,7 @@ public sealed partial class NotebookViewModel : ObservableObject, IDisposable
         }
 
         OnPropertyChanged(nameof(HasNoSources));
+        await Chat.LoadAsync();
     }
 
     public async Task ImportFilesAsync(IEnumerable<string> paths)
