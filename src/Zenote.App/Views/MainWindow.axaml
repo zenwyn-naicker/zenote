@@ -7,7 +7,7 @@
         Title="Zenote"
         Icon="avares://Zenote/Assets/icon.png"
         Width="1280" Height="820" MinWidth="880" MinHeight="560"
-        Background="{StaticResource PageBrush}">
+        Background="{DynamicResource PageBrush}">
   <Window.DataTemplates>
     <DataTemplate DataType="vm:NotebooksViewModel">
       <views:NotebooksView />
@@ -18,7 +18,7 @@
   </Window.DataTemplates>
 
   <DockPanel>
-    <Border DockPanel.Dock="Top" IsVisible="{Binding HasProblems}" Background="#FEF7E0" Padding="20,8">
+    <Border DockPanel.Dock="Top" IsVisible="{Binding HasProblems}" Background="{DynamicResource BannerBrush}" Padding="20,8">
       <StackPanel Spacing="6">
         <DockPanel>
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
@@ -26,7 +26,7 @@
             <Button Classes="pill primary" Height="30" Content="Download models" Command="{Binding DownloadModelsCommand}" IsVisible="{Binding CanDownloadModels}" />
             <Button Classes="pill" Height="30" Content="Check again" Command="{Binding RefreshCommand}" IsVisible="{Binding !IsDownloading}" />
           </StackPanel>
-          <TextBlock Text="{Binding ProblemText}" FontSize="13" Foreground="#7A4F01" VerticalAlignment="Center"
+          <TextBlock Text="{Binding ProblemText}" FontSize="13" Foreground="{DynamicResource BannerTextBrush}" VerticalAlignment="Center"
                      TextWrapping="Wrap" Margin="0,0,12,0" />
         </DockPanel>
         <ProgressBar Classes="thin" IsVisible="{Binding IsDownloading}" Value="{Binding DownloadPercent}" />
@@ -41,9 +41,9 @@
         <PathIcon Data="{StaticResource IconSettings}" />
       </Button>
 
-      <Border IsVisible="{Binding Settings.IsOpen}" Background="#59000000">
+      <Border IsVisible="{Binding Settings.IsOpen}" Background="{DynamicResource ScrimBrush}">
         <Border DataContext="{Binding Settings}" x:DataType="vm:SettingsViewModel"
-                Background="{StaticResource SurfaceBrush}" CornerRadius="20" Padding="28,22,28,20" Width="500"
+                Background="{DynamicResource SurfaceBrush}" CornerRadius="20" Padding="28,22,28,20" Width="500"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
           <StackPanel Spacing="16">
             <DockPanel>
@@ -54,40 +54,52 @@
             </DockPanel>
 
             <DockPanel>
+              <ComboBox DockPanel.Dock="Right" Classes="field" ItemsSource="{Binding Appearances}" SelectedItem="{Binding Appearance}"
+                        VerticalAlignment="Center" ToolTip.Tip="Appearance" />
+              <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Appearance" FontSize="14" FontWeight="Medium" />
+                <TextBlock Text="System follows your Mac's light or dark setting." FontSize="12" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DockPanel>
+
+            <Border Height="1" Background="{DynamicResource LineBrush}" />
+
+            <DockPanel>
               <ComboBox DockPanel.Dock="Right" Classes="field" ItemsSource="{Binding ModelPicker.Models}" SelectedItem="{Binding ModelPicker.Selected}"
+                        PlaceholderText="None installed yet"
                         IsVisible="{Binding IsConnected}" VerticalAlignment="Center" ToolTip.Tip="Chat model" />
               <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
                 <TextBlock Text="Chat model" FontSize="14" FontWeight="Medium" />
-                <TextBlock Text="Writes your answers. Changes apply to your next question." FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                <TextBlock Text="Writes your answers. Changes apply to your next question." FontSize="12" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" />
               </StackPanel>
             </DockPanel>
 
             <DockPanel>
-              <TextBlock DockPanel.Dock="Right" Text="{Binding SearchModel}" FontSize="13" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+              <TextBlock DockPanel.Dock="Right" Text="{Binding SearchModel}" FontSize="13" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
               <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
                 <TextBlock Text="Search model" FontSize="14" FontWeight="Medium" />
-                <TextBlock Text="Finds the passages in your sources that answers are based on." FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                <TextBlock Text="Finds the passages in your sources that answers are based on." FontSize="12" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" />
               </StackPanel>
             </DockPanel>
 
-            <Border Height="1" Background="{StaticResource LineBrush}" />
+            <Border Height="1" Background="{DynamicResource LineBrush}" />
 
             <DockPanel>
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                <Ellipse Width="8" Height="8" Fill="#1E8E3E" IsVisible="{Binding IsConnected}" VerticalAlignment="Center" />
-                <Ellipse Width="8" Height="8" Fill="{StaticResource DangerBrush}" IsVisible="{Binding !IsConnected}" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding ConnectionText}" FontSize="13" Foreground="{StaticResource MutedBrush}" />
+                <Ellipse Width="8" Height="8" Fill="{DynamicResource SuccessBrush}" IsVisible="{Binding IsConnected}" VerticalAlignment="Center" />
+                <Ellipse Width="8" Height="8" Fill="{DynamicResource DangerBrush}" IsVisible="{Binding !IsConnected}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ConnectionText}" FontSize="13" Foreground="{DynamicResource MutedBrush}" />
               </StackPanel>
               <TextBlock Text="Ollama" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" />
             </DockPanel>
 
-            <Border Height="1" Background="{StaticResource LineBrush}" />
+            <Border Height="1" Background="{DynamicResource LineBrush}" />
 
             <DockPanel>
               <Button DockPanel.Dock="Right" Classes="pill" Height="32" Content="Show in Finder" Command="{Binding ShowDataFolderCommand}" VerticalAlignment="Center" />
               <StackPanel Spacing="3" VerticalAlignment="Center" Margin="0,0,16,0">
                 <TextBlock Text="Your data" FontSize="14" FontWeight="Medium" />
-                <TextBlock Text="Notebooks and PDFs stay on this Mac." FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                <TextBlock Text="Notebooks and PDFs stay on this Mac." FontSize="12" Foreground="{DynamicResource MutedBrush}" />
               </StackPanel>
             </DockPanel>
 

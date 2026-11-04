@@ -162,6 +162,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         if (!failed)
         {
+            // Settings may already be open, showing the empty list from before the download.
+            await Settings.ModelPicker.LoadAsync();
             await _warmup.WarmUpAsync(CancellationToken.None);
         }
     }

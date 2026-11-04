@@ -11,6 +11,16 @@ public sealed class UserSettings(string path)
     /// False if the file exists but is damaged, in which case the app runs on its defaults.
     public bool IsReadable => !File.Exists(Path) || Read() is not null;
 
+    /// System, Light or Dark.
+    public string Appearance => Read()?["Appearance"]?.GetValue<string>() ?? "System";
+
+    public void SaveAppearance(string appearance)
+    {
+        var settings = Read() ?? [];
+        settings["Appearance"] = appearance;
+        Write(settings);
+    }
+
     public void SaveChatModel(string model)
     {
         var settings = Read() ?? [];
@@ -22,8 +32,11 @@ public sealed class UserSettings(string path)
         }
 
         models["ChatModel"] = model;
-        File.WriteAllText(Path, settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        Write(settings);
     }
+
+    private void Write(JsonObject settings) =>
+        File.WriteAllText(Path, settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
 
     private JsonObject? Read()
     {

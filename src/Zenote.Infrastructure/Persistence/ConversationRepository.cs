@@ -67,6 +67,26 @@ public sealed class ConversationRepository(SqliteConnectionFactory connections) 
         return messages;
     }
 
+    public async Task<Guid?> GetLastViewedAsync(Guid notebookId, CancellationToken ct)
+    {
+        using var connection = connections.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT last_conversation_id FROM notebooks WHERE id = $notebook";
+        command.Parameters.AddWithValue("$notebook", notebookId.ToString());
+
+        return await command.ExecuteScalarAsync(ct) is string id ? Guid.Parse(id) : null;
+    }
+
+    public async Task SetLastViewedAsync(Guid notebookId, Guid conversationId, CancellationToken ct)
+    {
+        using var connection = connections.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE notebooks SET last_conversation_id = $conversation WHERE id = $notebook";
+        command.Parameters.AddWithValue("$notebook", notebookId.ToString());
+        command.Parameters.AddWithValue("$conversation", conversationId.ToString());
+        await command.ExecuteNonQueryAsync(ct);
+    }
+
     public async Task AppendMessageAsync(Message message, CancellationToken ct)
     {
         using var connection = connections.Open();

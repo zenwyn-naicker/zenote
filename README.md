@@ -23,10 +23,15 @@ Free, and everything stays on your Mac.</p>
 - **Check every answer:** click a citation to see the exact PDF page it came from.
 - **Know when there's no answer:** if your documents don't cover something, Zenote says so and shows the closest pages.
 - **Pick up where you left off:** chats are saved, follow-up questions work, and any message copies in one click.
+- **Light or dark:** follows your Mac by default, or choose one in Settings.
 
-| Your notebooks | When the answer isn't there | Simple settings |
-|---|---|---|
-| ![Notebook cards on the home screen](docs/screenshots/home.png) | ![Zenote saying it couldn't find an answer, with the closest matches](docs/screenshots/not-found.png) | ![The settings window](docs/screenshots/settings.png) |
+| Your notebooks | When the answer isn't there |
+|---|---|
+| ![Notebook cards on the home screen](docs/screenshots/home.png) | ![Zenote saying it couldn't find an answer, with the closest matches](docs/screenshots/not-found.png) |
+
+| Simple settings | Dark mode |
+|---|---|
+| ![The settings window](docs/screenshots/settings.png) | ![Zenote in dark mode](docs/screenshots/dark.png) |
 
 ## Install Zenote
 
@@ -50,13 +55,13 @@ Zenote is a free project and isn't registered with Apple, so macOS blocks it the
 
 Ollama is the free app that runs the AI on your Mac, so your documents never leave it.
 
-1. Click **Open Ollama** in the yellow bar at the top of Zenote. If Ollama isn't installed yet, this opens its download page.
+1. Click **Open Ollama** in the bar at the top of Zenote. If Ollama isn't installed yet, this opens its download page.
 2. Download Ollama, move it to Applications and open it. You don't need to sign in.
 3. Back in Zenote, click **Check again**.
 
 **4. Download the AI models**
 
-Click **Download models** in the yellow bar and wait for it to finish. It's a one-time download of about 2.3 GB.
+Click **Download models** in the bar at the top and wait for it to finish. It's a one-time download of about 2.3 GB.
 
 **5. Start asking**
 
@@ -68,7 +73,7 @@ Click **Download models** in the yellow bar and wait for it to finish. It's a on
 
 | What you see | What to do |
 |---|---|
-| Yellow bar says Zenote needs Ollama | Click **Open Ollama**. It needs to be running whenever you use Zenote, and you'll see its llama icon in the menu bar. |
+| The bar at the top says Zenote needs Ollama | Click **Open Ollama**. It needs to be running whenever you use Zenote, and you'll see its llama icon in the menu bar. |
 | "Looks scanned. Text search won't work." | The PDF is a picture of a page. Zenote can show it but can't read it. |
 | "I couldn't find this in your documents." | Try asking something more specific, or name the document in your question. |
 | The first answer is slow | The AI is loading. Later answers are quicker. |
@@ -179,7 +184,7 @@ The app is ad-hoc signed rather than notarised, because notarising needs a paid 
 
 ## Configuration
 
-**Settings** (top right) switches the chat model between any you've pulled with Ollama. Defaults, including the Ollama address, live in `src/Zenote.App/appsettings.json`. Changing the embedding model there rebuilds the index on the next launch.
+**Settings** (top right) sets the appearance and switches the chat model between any you've pulled with Ollama. Defaults, including the Ollama address, live in `src/Zenote.App/appsettings.json`. Changing the embedding model there rebuilds the index on the next launch.
 
 Data is stored in `~/Library/Application Support/Zenote`. Unexpected errors are written to `errors.log` there.
 

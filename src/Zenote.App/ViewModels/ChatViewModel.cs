@@ -90,7 +90,8 @@ public sealed partial class ChatViewModel : ObservableObject
 
         if (Conversations.Count > 0)
         {
-            await ShowAsync(Conversations[0]);
+            var lastViewed = await _conversations.GetLastViewedAsync(_notebookId, CancellationToken.None);
+            await ShowAsync(Conversations.FirstOrDefault(c => c.Conversation.Id == lastViewed) ?? Conversations[0]);
         }
     }
 
@@ -111,6 +112,8 @@ public sealed partial class ChatViewModel : ObservableObject
         {
             Messages.Add(MessageViewModel.FromSaved(message, OpenAsync));
         }
+
+        await _conversations.SetLastViewedAsync(_notebookId, item.Conversation.Id, CancellationToken.None);
     }
 
     internal async Task RenameAsync(ConversationItemViewModel item, string title)
@@ -202,6 +205,7 @@ public sealed partial class ChatViewModel : ObservableObject
 
         var title = firstQuestion.Length <= MaxTitleLength ? firstQuestion : $"{firstQuestion[..MaxTitleLength].TrimEnd()}…";
         var conversation = await _conversations.CreateAsync(_notebookId, title, CancellationToken.None);
+        await _conversations.SetLastViewedAsync(_notebookId, conversation.Id, CancellationToken.None);
         var item = new ConversationItemViewModel(conversation, this);
 
         Conversations.Insert(0, item);

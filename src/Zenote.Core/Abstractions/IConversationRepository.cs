@@ -6,6 +6,8 @@ public interface IConversationRepository
 {
     Task<Conversation> CreateAsync(Guid notebookId, string title, CancellationToken ct);
     Task<IReadOnlyList<Conversation>> ListAsync(Guid notebookId, CancellationToken ct);
+    Task<Guid?> GetLastViewedAsync(Guid notebookId, CancellationToken ct);
+    Task SetLastViewedAsync(Guid notebookId, Guid conversationId, CancellationToken ct);
     Task<IReadOnlyList<Message>> GetMessagesAsync(Guid conversationId, CancellationToken ct);
     Task AppendMessageAsync(Message message, CancellationToken ct);
     Task RenameAsync(Guid id, string title, CancellationToken ct);

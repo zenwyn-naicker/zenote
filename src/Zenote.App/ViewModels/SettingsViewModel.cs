@@ -2,6 +2,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
+using Zenote.App.Services;
 using Zenote.Core.Abstractions;
 using Zenote.Core.Options;
 using Zenote.Infrastructure.Storage;
@@ -12,8 +13,15 @@ public sealed partial class SettingsViewModel(
     IOptions<ModelOptions> options,
     ModelPickerViewModel modelPicker,
     IAiHealthCheck health,
-    AppPaths paths) : ObservableObject
+    AppPaths paths,
+    UserSettings settings,
+    IAppearance appearance) : ObservableObject
 {
+    public IReadOnlyList<string> Appearances { get; } = ["System", "Light", "Dark"];
+
+    [ObservableProperty]
+    public partial string Appearance { get; set; } = settings.Appearance;
+
     public ModelPickerViewModel ModelPicker { get; } = modelPicker;
 
     public string SearchModel { get; } = options.Value.EmbeddingModel;
@@ -26,6 +34,12 @@ public sealed partial class SettingsViewModel(
     public partial bool IsConnected { get; set; }
 
     public string ConnectionText => IsConnected ? "Connected" : "Not running. Open Ollama from Applications.";
+
+    partial void OnAppearanceChanged(string value)
+    {
+        appearance.Apply(value);
+        settings.SaveAppearance(value);
+    }
 
     [RelayCommand]
     private async Task OpenAsync()
