@@ -38,6 +38,47 @@ public class ChatViewModelTests
     }
 
     [Fact]
+    public async Task Citations_become_chips_that_open_the_source()
+    {
+        Citation? opened = null;
+        var viewModel = CreateViewModel(new FakeChatClient("Twenty days [1]."));
+        viewModel.OpenCitation = citation => { opened = citation; return Task.CompletedTask; };
+        viewModel.Input = "How much leave?";
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        var chip = viewModel.Messages[1].Chips.Single();
+        chip.Label.ShouldBe("a.pdf · p. 1");
+        await chip.OpenCommand.ExecuteAsync(null);
+        opened!.Page.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task An_answer_with_no_citations_is_marked_unverified()
+    {
+        var viewModel = CreateViewModel(new FakeChatClient("Probably twenty days."));
+        viewModel.Input = "How much leave?";
+
+        await viewModel.SendCommand.ExecuteAsync(null);
+
+        viewModel.Messages[1].IsUnverified.ShouldBeTrue();
+        viewModel.Messages[1].HasChips.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Two_citations_to_one_page_share_a_chip()
+    {
+        var document = Guid.NewGuid();
+        var message = MessageViewModel.Pending();
+
+        message.Complete(
+            new Answer("Text [1][2].", false, [new Citation(1, document, "a.pdf", 3, "x"), new Citation(2, document, "a.pdf", 3, "y")]),
+            _ => Task.CompletedTask);
+
+        message.Chips.Count.ShouldBe(1);
+    }
+
+    [Fact]
     public void Blank_questions_cannot_be_sent()
     {
         var viewModel = CreateViewModel(new FakeChatClient());

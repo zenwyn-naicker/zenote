@@ -53,9 +53,14 @@ public sealed class RagAnswerService(IRetriever retriever, IChatClient chat) : I
 
         var answer = text.ToString().Trim();
 
-        yield return answer.Length == 0 || answer.StartsWith(PromptBuilder.NotFoundSignal, StringComparison.Ordinal)
-            ? NotFound(retrieval.Chunks)
-            : new AnswerCompleted(new Answer(answer, NotFound: false, retrieval.Chunks));
+        if (answer.Length == 0 || answer.StartsWith(PromptBuilder.NotFoundSignal, StringComparison.Ordinal))
+        {
+            yield return NotFound(retrieval.Chunks);
+            yield break;
+        }
+
+        var (cleaned, citations) = CitationParser.Parse(answer, retrieval.Chunks);
+        yield return new AnswerCompleted(new Answer(cleaned, NotFound: false, citations));
     }
 
     // Follow-ups like "what about the second one?" mean little alone. Searching with the previous
@@ -76,5 +81,8 @@ public sealed class RagAnswerService(IRetriever retriever, IChatClient chat) : I
     }
 
     private static AnswerCompleted NotFound(IReadOnlyList<ScoredChunk> chunks) =>
-        new(new Answer(NotFoundText, NotFound: true, chunks.Take(ClosestMatchCount).ToList()));
+        new(new Answer(
+            NotFoundText,
+            NotFound: true,
+            chunks.Take(ClosestMatchCount).Select(chunk => CitationParser.ToCitation(0, chunk)).ToList()));
 }

@@ -1,31 +1,283 @@
 {
   "answerable": [
-    { "question": "How many paid vacation days do full-time employees get?", "file": "northwind-handbook.pdf", "pages": [2] },
-    { "question": "How long is the probation period for new staff?", "file": "northwind-handbook.pdf", "pages": [1] },
-    { "question": "Can I work from home on Wednesdays?", "file": "northwind-handbook.pdf", "pages": [3] },
-    { "question": "When do carried-over leave days expire?", "file": "northwind-handbook.pdf", "pages": [2] },
-    { "question": "How much can I claim for a desk for my home office?", "file": "northwind-handbook.pdf", "pages": [3] },
-    { "question": "What is the mileage rate for using my own car?", "file": "northwind-handbook.pdf", "pages": [4] },
-    { "question": "Who reads messages sent to the ethics line?", "file": "northwind-handbook.pdf", "pages": [4] },
-    { "question": "When do I need a doctor's note for being sick?", "file": "northwind-handbook.pdf", "pages": [2] },
-    { "question": "How much ground coffee should I use for a double shot?", "file": "aurelia-espresso-manual.pdf", "pages": [2] },
-    { "question": "What does error E04 mean?", "file": "aurelia-espresso-manual.pdf", "pages": [4] },
-    { "question": "Why shouldn't I descale the machine with vinegar?", "file": "aurelia-espresso-manual.pdf", "pages": [3] },
-    { "question": "How long does the machine take to heat up the first time?", "file": "aurelia-espresso-manual.pdf", "pages": [1] },
-    { "question": "My shot only drips out slowly, what should I change?", "file": "aurelia-espresso-manual.pdf", "pages": [2] },
-    { "question": "How long is the warranty and how do I keep it valid?", "file": "aurelia-espresso-manual.pdf", "pages": [4] },
-    { "question": "How often does the water filter need replacing?", "file": "aurelia-espresso-manual.pdf", "pages": [3] },
-    { "question": "Which day is rubbish collected in the southern suburbs?", "file": "seabreeze-recycling-guide.pdf", "pages": [1] },
-    { "question": "Can I recycle a greasy pizza box?", "file": "seabreeze-recycling-guide.pdf", "pages": [2] },
-    { "question": "Where do I take old paint and batteries?", "file": "seabreeze-recycling-guide.pdf", "pages": [3] },
-    { "question": "How much does it cost to have an old mattress removed?", "file": "seabreeze-recycling-guide.pdf", "pages": [3] },
-    { "question": "What is the penalty for dumping rubbish illegally?", "file": "seabreeze-recycling-guide.pdf", "pages": [4] },
-    { "question": "Why can't cooked food go in the compost?", "file": "seabreeze-recycling-guide.pdf", "pages": [4] },
-    { "question": "How much did household electricity bills drop in the solar pilot?", "file": "tidepool-solar-report.pdf", "pages": [3] },
-    { "question": "Who funded the Tidepool project?", "file": "tidepool-solar-report.pdf", "pages": [1] },
-    { "question": "What caused the inverters to fail?", "file": "tidepool-solar-report.pdf", "pages": [3] },
-    { "question": "What held up the installation of the panels?", "file": "tidepool-solar-report.pdf", "pages": [2] },
-    { "question": "How many homes will the second phase include?", "file": "tidepool-solar-report.pdf", "pages": [4] }
+    {
+      "question": "How many paid vacation days do full-time employees get?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "twenty-two",
+        "22"
+      ]
+    },
+    {
+      "question": "How long is the probation period for new staff?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        1
+      ],
+      "facts": [
+        "three months",
+        "3 months"
+      ]
+    },
+    {
+      "question": "Can I work from home on Wednesdays?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "office",
+        "no"
+      ]
+    },
+    {
+      "question": "When do carried-over leave days expire?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "31 march",
+        "march 31"
+      ]
+    },
+    {
+      "question": "How much can I claim for a desk for my home office?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "3,500",
+        "3500"
+      ]
+    },
+    {
+      "question": "What is the mileage rate for using my own car?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "4.84"
+      ]
+    },
+    {
+      "question": "Who reads messages sent to the ethics line?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "head of compliance"
+      ]
+    },
+    {
+      "question": "When do I need a doctor's note for being sick?",
+      "file": "northwind-handbook.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "two consecutive",
+        "2 consecutive",
+        "longer than two",
+        "more than two"
+      ]
+    },
+    {
+      "question": "How much ground coffee should I use for a double shot?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "18"
+      ]
+    },
+    {
+      "question": "What does error E04 mean?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "tank",
+        "float"
+      ]
+    },
+    {
+      "question": "Why shouldn't I descale the machine with vinegar?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "seals",
+        "warranty"
+      ]
+    },
+    {
+      "question": "How long does the machine take to heat up the first time?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        1
+      ],
+      "facts": [
+        "twelve",
+        "12"
+      ]
+    },
+    {
+      "question": "My shot only drips out slowly, what should I change?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "coarser"
+      ]
+    },
+    {
+      "question": "How long is the warranty and how do I keep it valid?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "24",
+        "registered"
+      ]
+    },
+    {
+      "question": "How often does the water filter need replacing?",
+      "file": "aurelia-espresso-manual.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "sixty",
+        "60"
+      ]
+    },
+    {
+      "question": "Which day is rubbish collected in the southern suburbs?",
+      "file": "seabreeze-recycling-guide.pdf",
+      "pages": [
+        1
+      ],
+      "facts": [
+        "thursday"
+      ]
+    },
+    {
+      "question": "Can I recycle a greasy pizza box?",
+      "file": "seabreeze-recycling-guide.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "green",
+        "no"
+      ]
+    },
+    {
+      "question": "Where do I take old paint and batteries?",
+      "file": "seabreeze-recycling-guide.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "harbour road",
+        "hazardous waste day"
+      ]
+    },
+    {
+      "question": "How much does it cost to have an old mattress removed?",
+      "file": "seabreeze-recycling-guide.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "180"
+      ]
+    },
+    {
+      "question": "What is the penalty for dumping rubbish illegally?",
+      "file": "seabreeze-recycling-guide.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "15,000",
+        "15000"
+      ]
+    },
+    {
+      "question": "Why can't cooked food go in the compost?",
+      "file": "seabreeze-recycling-guide.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "rats"
+      ]
+    },
+    {
+      "question": "How much did household electricity bills drop in the solar pilot?",
+      "file": "tidepool-solar-report.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "31"
+      ]
+    },
+    {
+      "question": "Who funded the Tidepool project?",
+      "file": "tidepool-solar-report.pdf",
+      "pages": [
+        1
+      ],
+      "facts": [
+        "coastal energy trust"
+      ]
+    },
+    {
+      "question": "What caused the inverters to fail?",
+      "file": "tidepool-solar-report.pdf",
+      "pages": [
+        3
+      ],
+      "facts": [
+        "salt",
+        "corrosion"
+      ]
+    },
+    {
+      "question": "What held up the installation of the panels?",
+      "file": "tidepool-solar-report.pdf",
+      "pages": [
+        2
+      ],
+      "facts": [
+        "roof",
+        "structural"
+      ]
+    },
+    {
+      "question": "How many homes will the second phase include?",
+      "file": "tidepool-solar-report.pdf",
+      "pages": [
+        4
+      ],
+      "facts": [
+        "600"
+      ]
+    }
   ],
   "unanswerable": [
     "What is the capital of Australia?",
