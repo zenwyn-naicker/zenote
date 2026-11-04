@@ -2,11 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Zenote.App.Controls.ZenoteLogo"
              Width="30" Height="30">
-  <Border CornerRadius="7" Background="{StaticResource TextBrush}">
+  <Border CornerRadius="7" Background="{DynamicResource LogoTileBrush}">
     <Viewbox>
       <Canvas Width="100" Height="100">
         <Path Fill="White" Data="M32 22h24l20 20v29a7 7 0 0 1-7 7H32a7 7 0 0 1-7-7V29a7 7 0 0 1 7-7z" />
-        <Path Fill="{StaticResource TextBrush}" Data="M59 55a9 9 0 1 1-18 0a9 9 0 0 1 18 0z" />
+        <Path Fill="{DynamicResource LogoTileBrush}" Data="M59 55a9 9 0 1 1-18 0a9 9 0 0 1 18 0z" />
       </Canvas>
     </Viewbox>
   </Border>

@@ -17,11 +17,13 @@ public sealed class SettingsViewModelTests : IDisposable
 
     private readonly IAiHealthCheck _health = Substitute.For<IAiHealthCheck>();
     private readonly IChatModels _models = Substitute.For<IChatModels>();
+    private readonly IAppearance _appearance = Substitute.For<IAppearance>();
 
     private SettingsViewModel CreateViewModel()
     {
-        var picker = new ModelPickerViewModel(_models, new UserSettings(_path), Substitute.For<IModelWarmup>());
-        return new SettingsViewModel(Options.Create(new ModelOptions()), picker, _health, new AppPaths("/tmp/zenote"));
+        var settings = new UserSettings(_path);
+        var picker = new ModelPickerViewModel(_models, settings, Substitute.For<IModelWarmup>());
+        return new SettingsViewModel(Options.Create(new ModelOptions()), picker, _health, new AppPaths("/tmp/zenote"), settings, _appearance);
     }
 
     [Fact]
@@ -71,6 +73,34 @@ public sealed class SettingsViewModelTests : IDisposable
     public void Having_no_settings_file_is_fine()
     {
         new UserSettings(_path).IsReadable.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Appearance_follows_the_system_by_default()
+    {
+        CreateViewModel().Appearance.ShouldBe("System");
+    }
+
+    [Fact]
+    public void Choosing_an_appearance_applies_it_and_remembers_it()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.Appearance = "Dark";
+
+        _appearance.Received(1).Apply("Dark");
+        CreateViewModel().Appearance.ShouldBe("Dark");
+    }
+
+    [Fact]
+    public void Saving_a_model_keeps_the_appearance()
+    {
+        var settings = new UserSettings(_path);
+
+        settings.SaveAppearance("Dark");
+        settings.SaveChatModel("llama3.2");
+
+        settings.Appearance.ShouldBe("Dark");
     }
 
     [Fact]

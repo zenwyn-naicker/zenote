@@ -1,20 +1,65 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Styles.Resources>
-    <SolidColorBrush x:Key="PageBrush" Color="#F3F5F8" />
-    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="LineBrush" Color="#E3E5E8" />
-    <SolidColorBrush x:Key="HoverBrush" Color="#F1F3F4" />
-    <SolidColorBrush x:Key="TextBrush" Color="#1F1F1F" />
-    <SolidColorBrush x:Key="MutedBrush" Color="#5F6368" />
-    <SolidColorBrush x:Key="FaintBrush" Color="#80868B" />
-    <SolidColorBrush x:Key="AccentBrush" Color="#0B57D0" />
-    <SolidColorBrush x:Key="AccentSoftBrush" Color="#E8F0FE" />
-    <SolidColorBrush x:Key="UserBubbleBrush" Color="#EDF1F7" />
-    <SolidColorBrush x:Key="PassageBrush" Color="#F1F5FB" />
-    <SolidColorBrush x:Key="WarningBrush" Color="#B06000" />
-    <SolidColorBrush x:Key="DangerBrush" Color="#C5221F" />
-    <SolidColorBrush x:Key="PdfBrush" Color="#D93025" />
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="PageBrush" Color="#F3F5F8" />
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="LineBrush" Color="#E3E5E8" />
+          <SolidColorBrush x:Key="HoverBrush" Color="#F1F3F4" />
+          <SolidColorBrush x:Key="TextBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="MutedBrush" Color="#5F6368" />
+          <SolidColorBrush x:Key="FaintBrush" Color="#80868B" />
+          <SolidColorBrush x:Key="AccentBrush" Color="#0B57D0" />
+          <SolidColorBrush x:Key="AccentSoftBrush" Color="#E8F0FE" />
+          <SolidColorBrush x:Key="UserBubbleBrush" Color="#EDF1F7" />
+          <SolidColorBrush x:Key="PassageBrush" Color="#F1F5FB" />
+          <SolidColorBrush x:Key="WarningBrush" Color="#B06000" />
+          <SolidColorBrush x:Key="DangerBrush" Color="#C5221F" />
+          <SolidColorBrush x:Key="PdfBrush" Color="#D93025" />
+          <SolidColorBrush x:Key="SuccessBrush" Color="#1E8E3E" />
+          <SolidColorBrush x:Key="PrimaryBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#3C4043" />
+          <SolidColorBrush x:Key="OnPrimaryBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="DisabledBrush" Color="#C4C7C5" />
+          <SolidColorBrush x:Key="BannerBrush" Color="#E8F0FE" />
+          <SolidColorBrush x:Key="BannerTextBrush" Color="#174EA6" />
+          <SolidColorBrush x:Key="CardHoverBrush" Color="#0A000000" />
+          <SolidColorBrush x:Key="CardPressedBrush" Color="#14000000" />
+          <SolidColorBrush x:Key="LogoTileBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="ScrimBrush" Color="#59000000" />
+          <SolidColorBrush x:Key="NotebookCardBrush" Color="#E9ECF0" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="PageBrush" Color="#131314" />
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#1E1F20" />
+          <SolidColorBrush x:Key="LineBrush" Color="#34363A" />
+          <SolidColorBrush x:Key="HoverBrush" Color="#2B2C2F" />
+          <SolidColorBrush x:Key="TextBrush" Color="#E8EAED" />
+          <SolidColorBrush x:Key="MutedBrush" Color="#A9AEB5" />
+          <SolidColorBrush x:Key="FaintBrush" Color="#868B92" />
+          <SolidColorBrush x:Key="AccentBrush" Color="#A8C7FA" />
+          <SolidColorBrush x:Key="AccentSoftBrush" Color="#26344C" />
+          <SolidColorBrush x:Key="UserBubbleBrush" Color="#2B2D33" />
+          <SolidColorBrush x:Key="PassageBrush" Color="#23272F" />
+          <SolidColorBrush x:Key="WarningBrush" Color="#F2B84B" />
+          <SolidColorBrush x:Key="DangerBrush" Color="#F28B82" />
+          <SolidColorBrush x:Key="PdfBrush" Color="#F28B82" />
+          <SolidColorBrush x:Key="SuccessBrush" Color="#81C995" />
+          <SolidColorBrush x:Key="PrimaryBrush" Color="#E8EAED" />
+          <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#C4C7C5" />
+          <SolidColorBrush x:Key="OnPrimaryBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="DisabledBrush" Color="#55585D" />
+          <SolidColorBrush x:Key="BannerBrush" Color="#26344C" />
+          <SolidColorBrush x:Key="BannerTextBrush" Color="#D3E3FD" />
+          <SolidColorBrush x:Key="CardHoverBrush" Color="#12FFFFFF" />
+          <SolidColorBrush x:Key="CardPressedBrush" Color="#1EFFFFFF" />
+          <SolidColorBrush x:Key="LogoTileBrush" Color="#3A3C40" />
+          <SolidColorBrush x:Key="ScrimBrush" Color="#99000000" />
+          <SolidColorBrush x:Key="NotebookCardBrush" Color="#1E1F20" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
 
     <StreamGeometry x:Key="IconAdd">M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z</StreamGeometry>
     <StreamGeometry x:Key="IconClose">M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z</StreamGeometry>
@@ -32,22 +77,23 @@
     <StreamGeometry x:Key="IconCopy">M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z</StreamGeometry>
     <StreamGeometry x:Key="IconCheck">M9 16.170L4.830 12l-1.420 1.410L9 19 21 7l-1.410-1.410z</StreamGeometry>
     <StreamGeometry x:Key="IconDelete">M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z</StreamGeometry>
+    </ResourceDictionary>
   </Styles.Resources>
 
   <Style Selector="TextBlock.title">
     <Setter Property="FontSize" Value="15" />
     <Setter Property="FontWeight" Value="Medium" />
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
   </Style>
   <Style Selector="TextBlock.muted">
     <Setter Property="FontSize" Value="13" />
-    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
   </Style>
 
   <Style Selector="Border.panel">
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
     <Setter Property="CornerRadius" Value="16" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="ClipToBounds" Value="True" />
   </Style>
@@ -55,7 +101,7 @@
   <!-- Buttons -->
   <Style Selector="Button">
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
   </Style>
 
   <Style Selector="Button.icon">
@@ -67,7 +113,7 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
-    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
   </Style>
   <Style Selector="Button.icon PathIcon">
     <Setter Property="Width" Value="16" />
@@ -75,13 +121,13 @@
   </Style>
   <Style Selector="Button.icon:disabled /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="#C4C7C5" />
+    <Setter Property="Foreground" Value="{DynamicResource DisabledBrush}" />
   </Style>
   <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
   </Style>
   <Style Selector="Button.icon:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
   </Style>
 
   <Style Selector="Button.small">
@@ -98,8 +144,8 @@
     <Setter Property="Height" Value="38" />
     <Setter Property="Padding" Value="16,0" />
     <Setter Property="CornerRadius" Value="19" />
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="FontSize" Value="13" />
     <Setter Property="FontWeight" Value="Medium" />
@@ -107,22 +153,22 @@
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="Button.pill:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
   </Style>
 
   <Style Selector="Button.primary">
-    <Setter Property="Background" Value="{StaticResource TextBrush}" />
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Foreground" Value="{DynamicResource OnPrimaryBrush}" />
   </Style>
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="#3C4043" />
-    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Background" Value="{DynamicResource PrimaryHoverBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource OnPrimaryBrush}" />
   </Style>
   <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource LineBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource FaintBrush}" />
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource FaintBrush}" />
   </Style>
 
   <Style Selector="Button.send">
@@ -131,8 +177,8 @@
     <Setter Property="Padding" Value="0" />
     <Setter Property="CornerRadius" Value="15" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Background" Value="{StaticResource TextBrush}" />
-    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource OnPrimaryBrush}" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
@@ -146,12 +192,12 @@
     <Setter Property="Height" Value="9" />
   </Style>
   <Style Selector="Button.send:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="#3C4043" />
-    <Setter Property="Foreground" Value="White" />
+    <Setter Property="Background" Value="{DynamicResource PrimaryHoverBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource OnPrimaryBrush}" />
   </Style>
   <Style Selector="Button.send:disabled /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource LineBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource FaintBrush}" />
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource FaintBrush}" />
   </Style>
 
   <Style Selector="Button.card">
@@ -165,10 +211,10 @@
     <Setter Property="VerticalAlignment" Value="Stretch" />
   </Style>
   <Style Selector="Button.card:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="#0A000000" />
+    <Setter Property="Background" Value="{DynamicResource CardHoverBrush}" />
   </Style>
   <Style Selector="Button.card:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="#14000000" />
+    <Setter Property="Background" Value="{DynamicResource CardPressedBrush}" />
   </Style>
 
   <Style Selector="Button.chip">
@@ -176,17 +222,17 @@
     <Setter Property="Padding" Value="10,0" />
     <Setter Property="Margin" Value="0,0,6,6" />
     <Setter Property="CornerRadius" Value="14" />
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="Button.chip:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource AccentSoftBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
   </Style>
 
   <Style Selector="Button.citation">
@@ -197,16 +243,16 @@
     <Setter Property="Margin" Value="3,0,0,0" />
     <Setter Property="CornerRadius" Value="9" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
     <Setter Property="FontSize" Value="10" />
     <Setter Property="FontWeight" Value="Medium" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="Button.citation:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
   </Style>
 
   <!-- Copy button: appears when the pointer is over its message -->
@@ -237,10 +283,10 @@
   <Style Selector="TextBox.field">
     <Setter Property="CornerRadius" Value="10" />
     <Setter Property="Padding" Value="12,9" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
   </Style>
   <Style Selector="TextBox.field:focus /template/ Border#PART_BorderElement">
-    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
     <Setter Property="BorderThickness" Value="1" />
   </Style>
 
@@ -249,17 +295,17 @@
     <Setter Property="MinHeight" Value="36" />
     <Setter Property="MinWidth" Value="170" />
     <Setter Property="FontSize" Value="13" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
   <Style Selector="ComboBox.field:pointerover /template/ Border#Background">
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
   </Style>
   <Style Selector="ComboBox.field /template/ Border#PopupBorder">
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
     <Setter Property="CornerRadius" Value="10" />
     <Setter Property="Padding" Value="4" />
   </Style>
@@ -268,27 +314,27 @@
     <Setter Property="FontSize" Value="13" />
   </Style>
   <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
   </Style>
   <Style Selector="ComboBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
   </Style>
   <Style Selector="ComboBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
   </Style>
 
   <!-- Menus and popovers -->
   <Style Selector="FlyoutPresenter">
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="14" />
     <Setter Property="Padding" Value="6" />
     <Setter Property="MaxWidth" Value="360" />
   </Style>
   <Style Selector="MenuFlyoutPresenter">
-    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="12" />
     <Setter Property="Padding" Value="4" />
@@ -311,20 +357,20 @@
     <Setter Property="Cursor" Value="Hand" />
   </Style>
   <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
   </Style>
   <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
   </Style>
   <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
   </Style>
 
   <Style Selector="ProgressBar.thin">
     <Setter Property="Height" Value="3" />
     <Setter Property="MinHeight" Value="3" />
     <Setter Property="CornerRadius" Value="2" />
-    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
-    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
   </Style>
 </Styles>

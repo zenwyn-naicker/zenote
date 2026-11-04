@@ -46,8 +46,8 @@
     </DockPanel>
 
     <StackPanel DockPanel.Dock="Bottom" Margin="24,8,24,12" Spacing="8" MaxWidth="760">
-      <Border CornerRadius="24" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
-              Background="{StaticResource SurfaceBrush}" Padding="20,8,8,8">
+      <Border CornerRadius="24" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+              Background="{DynamicResource SurfaceBrush}" Padding="20,8,8,8">
         <DockPanel>
           <Panel DockPanel.Dock="Right" VerticalAlignment="Bottom">
             <Button Classes="send" Command="{Binding SendCommand}" IsVisible="{Binding IsIdle}" ToolTip.Tip="Send">
@@ -57,7 +57,7 @@
               <PathIcon Classes="stop" Data="{StaticResource IconStop}" />
             </Button>
           </Panel>
-          <TextBlock DockPanel.Dock="Right" Text="{Binding SourcesLabel}" FontSize="12" Foreground="{StaticResource FaintBrush}"
+          <TextBlock DockPanel.Dock="Right" Text="{Binding SourcesLabel}" FontSize="12" Foreground="{DynamicResource FaintBrush}"
                      VerticalAlignment="Center" Margin="12,0" />
           <TextBox Classes="bare" Text="{Binding Input}" PlaceholderText="{Binding InputHint}" AcceptsReturn="False" MaxLength="4000"
                    TextWrapping="Wrap" MaxHeight="120" FontSize="14">
@@ -68,7 +68,7 @@
         </DockPanel>
       </Border>
       <TextBlock Text="Zenote can be inaccurate, so check important answers against their sources." FontSize="11"
-                 Foreground="{StaticResource FaintBrush}" HorizontalAlignment="Center" />
+                 Foreground="{DynamicResource FaintBrush}" HorizontalAlignment="Center" />
     </StackPanel>
 
     <Panel>
@@ -77,11 +77,11 @@
           <TextBlock Text="{Binding NotebookTitle}" FontSize="30" FontWeight="Medium" LetterSpacing="-0.4" TextWrapping="Wrap" />
           <TextBlock Text="{Binding SourcesLabel}" Classes="muted" />
           <TextBlock Text="Ask a specific question. Answers come only from your sources and link to the page they came from."
-                     FontSize="14" LineHeight="22" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,12,0,0" />
+                     FontSize="14" LineHeight="22" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,12,0,0" />
         </StackPanel>
 
         <StackPanel IsVisible="{Binding HasNoSources}" Spacing="10">
-          <PathIcon Data="{StaticResource IconDocument}" Width="40" Height="40" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" />
+          <PathIcon Data="{StaticResource IconDocument}" Width="40" Height="40" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" />
           <TextBlock Text="Add a source to get started" FontSize="20" FontWeight="Medium" HorizontalAlignment="Center" />
           <TextBlock Text="Your PDFs stay on this Mac." Classes="muted" HorizontalAlignment="Center" />
         </StackPanel>
@@ -94,13 +94,13 @@
               <Panel Classes="message" Background="Transparent" Margin="0,4">
                 <StackPanel IsVisible="{Binding IsUser}" HorizontalAlignment="Right" Spacing="2">
                   <Border HorizontalAlignment="Right" MaxWidth="560"
-                          Background="{StaticResource UserBubbleBrush}" CornerRadius="18,18,4,18" Padding="16,10">
+                          Background="{DynamicResource UserBubbleBrush}" CornerRadius="18,18,4,18" Padding="16,10">
                     <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
                   </Border>
                   <Button Classes="icon small copy" Click="OnCopyClicked" HorizontalAlignment="Right" ToolTip.Tip="Copy">
                     <Panel>
                       <PathIcon Data="{StaticResource IconCopy}" IsVisible="{Binding !IsCopied}" />
-                      <PathIcon Data="{StaticResource IconCheck}" IsVisible="{Binding IsCopied}" Foreground="#1E8E3E" />
+                      <PathIcon Data="{StaticResource IconCheck}" IsVisible="{Binding IsCopied}" Foreground="{DynamicResource SuccessBrush}" />
                     </Panel>
                   </Button>
                 </StackPanel>
@@ -111,21 +111,21 @@
                                        Classes.notFound="{Binding IsNotFound}" Classes.failed="{Binding IsFailed}">
                     <controls:AnswerText.Styles>
                       <Style Selector="SelectableTextBlock.notFound">
-                        <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
                       </Style>
                       <Style Selector="SelectableTextBlock.failed">
-                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
                       </Style>
                     </controls:AnswerText.Styles>
                   </controls:AnswerText>
 
-                  <TextBlock IsVisible="{Binding IsStopped}" Text="Stopped" FontSize="12" Foreground="{StaticResource FaintBrush}" />
+                  <TextBlock IsVisible="{Binding IsStopped}" Text="Stopped" FontSize="12" Foreground="{DynamicResource FaintBrush}" />
 
-                  <TextBlock IsVisible="{Binding IsUnverified}" FontSize="12" Foreground="{StaticResource WarningBrush}"
+                  <TextBlock IsVisible="{Binding IsUnverified}" FontSize="12" Foreground="{DynamicResource WarningBrush}"
                              Text="{Binding UnverifiedText}" TextWrapping="Wrap" />
 
                   <StackPanel IsVisible="{Binding HasChips}" Spacing="6">
-                    <TextBlock Text="{Binding ChipsHeading}" FontSize="12" Foreground="{StaticResource FaintBrush}" />
+                    <TextBlock Text="{Binding ChipsHeading}" FontSize="12" Foreground="{DynamicResource FaintBrush}" />
                     <ItemsControl ItemsSource="{Binding Chips}">
                       <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -145,7 +145,7 @@
                   <Button Classes="icon small copy" Click="OnCopyClicked" IsVisible="{Binding CanCopy}" ToolTip.Tip="Copy" Margin="0,-4,0,0" HorizontalAlignment="Left">
                     <Panel>
                       <PathIcon Data="{StaticResource IconCopy}" IsVisible="{Binding !IsCopied}" />
-                      <PathIcon Data="{StaticResource IconCheck}" IsVisible="{Binding IsCopied}" Foreground="#1E8E3E" />
+                      <PathIcon Data="{StaticResource IconCheck}" IsVisible="{Binding IsCopied}" Foreground="{DynamicResource SuccessBrush}" />
                     </Panel>
                   </Button>
                 </StackPanel>

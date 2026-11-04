@@ -26,8 +26,8 @@
                Margin="0,0,60,0" VerticalAlignment="Center" />
     </DockPanel>
 
-    <Border DockPanel.Dock="Top" IsVisible="{Binding HasMessage}" Background="#FEF7E0" CornerRadius="12" Padding="14,9" Margin="0,0,0,12">
-      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" Foreground="#7A4F01" />
+    <Border DockPanel.Dock="Top" IsVisible="{Binding HasMessage}" Background="{DynamicResource BannerBrush}" CornerRadius="12" Padding="14,9" Margin="0,0,0,12">
+      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource BannerTextBrush}" />
     </Border>
 
     <Grid ColumnDefinitions="Auto,*,Auto">
@@ -46,9 +46,9 @@
 
           <Panel>
             <StackPanel IsVisible="{Binding HasNoSources}" Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="28,0,28,60">
-              <PathIcon Data="{StaticResource IconDocument}" Width="36" Height="36" Foreground="#C4C7C5" HorizontalAlignment="Center" />
-              <TextBlock Text="Saved sources will appear here" FontSize="13" FontWeight="Medium" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" />
-              <TextBlock Text="Drop PDFs anywhere in this window, or use Add sources." FontSize="12" Foreground="{StaticResource FaintBrush}"
+              <PathIcon Data="{StaticResource IconDocument}" Width="36" Height="36" Foreground="{DynamicResource DisabledBrush}" HorizontalAlignment="Center" />
+              <TextBlock Text="Saved sources will appear here" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" />
+              <TextBlock Text="Drop PDFs anywhere in this window, or use Add sources." FontSize="12" Foreground="{DynamicResource FaintBrush}"
                          TextWrapping="Wrap" TextAlignment="Center" LineHeight="18" />
             </StackPanel>
 
@@ -57,29 +57,29 @@
                 <DataTemplate x:DataType="vm:SourceItemViewModel">
                   <DockPanel>
                     <PathIcon DockPanel.Dock="Left" Data="{StaticResource IconDocument}" Width="18" Height="18"
-                              Foreground="{StaticResource PdfBrush}" Margin="0,1,10,0" VerticalAlignment="Top" />
+                              Foreground="{DynamicResource PdfBrush}" Margin="0,1,10,0" VerticalAlignment="Top" />
                     <Button DockPanel.Dock="Right" Classes="icon small" Command="{Binding StartRemoveCommand}" ToolTip.Tip="Remove source"
                             VerticalAlignment="Top" Margin="4,-3,-4,0">
                       <PathIcon Data="{StaticResource IconClose}" />
                     </Button>
                     <StackPanel Spacing="3">
                       <TextBlock Text="{Binding FileName}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                      <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="{StaticResource FaintBrush}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="{DynamicResource FaintBrush}" TextWrapping="Wrap" />
                       <ProgressBar Classes="thin" IsVisible="{Binding IsIndexing}" Value="{Binding ProgressPercent}" Margin="0,3" />
                       <StackPanel Orientation="Horizontal" Spacing="10">
                         <Button IsVisible="{Binding IsIndexing}" Content="Cancel" Command="{Binding CancelCommand}"
-                                Background="Transparent" Padding="0" FontSize="12" Foreground="{StaticResource AccentBrush}" />
+                                Background="Transparent" Padding="0" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
                         <Button IsVisible="{Binding CanRetry}" Content="Retry" Command="{Binding RetryCommand}"
-                                Background="Transparent" Padding="0" FontSize="12" Foreground="{StaticResource AccentBrush}" />
+                                Background="Transparent" Padding="0" FontSize="12" Foreground="{DynamicResource AccentBrush}" />
                       </StackPanel>
                       <StackPanel IsVisible="{Binding IsConfirmingRemove}" Orientation="Horizontal" Spacing="12" Margin="0,2,0,0">
-                        <TextBlock Text="Remove this source?" FontSize="12" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="Remove this source?" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
                         <Button Content="Remove" Command="{Binding DeleteCommand}" Background="Transparent" Padding="0" FontSize="12"
-                                Foreground="{StaticResource DangerBrush}" />
+                                Foreground="{DynamicResource DangerBrush}" />
                         <Button Content="Keep" Command="{Binding KeepSourceCommand}" Background="Transparent" Padding="0" FontSize="12"
-                                Foreground="{StaticResource AccentBrush}" />
+                                Foreground="{DynamicResource AccentBrush}" />
                       </StackPanel>
-                      <TextBlock IsVisible="{Binding LooksScanned}" FontSize="12" Foreground="{StaticResource WarningBrush}" TextWrapping="Wrap"
+                      <TextBlock IsVisible="{Binding LooksScanned}" FontSize="12" Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"
                                  Text="Looks scanned. Text search won't work." />
                     </StackPanel>
                   </DockPanel>
@@ -118,10 +118,10 @@
             </StackPanel>
           </DockPanel>
 
-          <Border DockPanel.Dock="Top" IsVisible="{Binding HasSnippet}" Background="{StaticResource PassageBrush}"
+          <Border DockPanel.Dock="Top" IsVisible="{Binding HasSnippet}" Background="{DynamicResource PassageBrush}"
                   Margin="16,0,16,12" CornerRadius="12" MaxHeight="170">
             <DockPanel Margin="12">
-              <Border DockPanel.Dock="Left" Width="3" CornerRadius="2" Background="{StaticResource AccentBrush}" Margin="0,0,12,0" />
+              <Border DockPanel.Dock="Left" Width="3" CornerRadius="2" Background="{DynamicResource AccentBrush}" Margin="0,0,12,0" />
               <ScrollViewer>
                 <SelectableTextBlock Text="{Binding Snippet}" TextWrapping="Wrap" FontSize="13" LineHeight="20" Margin="0,0,10,0" />
               </ScrollViewer>
@@ -131,7 +131,7 @@
           <TextBlock DockPanel.Dock="Top" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}"
                      Classes="muted" Margin="20,4" TextWrapping="Wrap" />
 
-          <ScrollViewer Background="{StaticResource PageBrush}">
+          <ScrollViewer Background="{DynamicResource PageBrush}">
             <Border Margin="14" VerticalAlignment="Top" CornerRadius="4" ClipToBounds="True" BoxShadow="0 1 6 0 #22000000">
               <Image Source="{Binding PageImage, Converter={StaticResource BytesToBitmap}}" Stretch="Uniform" />
             </Border>

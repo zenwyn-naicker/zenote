@@ -12,7 +12,7 @@
       </StackPanel>
 
       <TextBlock Text="Let your documents talk" FontSize="40" FontWeight="Medium" LetterSpacing="-0.6" Margin="0,0,0,8" />
-      <TextBlock Text="Everything stays on your Mac." FontSize="15" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,36" />
+      <TextBlock Text="Everything stays on your Mac." FontSize="15" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,36" />
 
       <TextBlock Text="Notebooks" FontSize="18" FontWeight="Medium" Margin="0,0,0,16" />
 
@@ -24,12 +24,12 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.DataTemplates>
           <DataTemplate DataType="vm:CreateNotebookTile">
-            <Border Width="244" Height="196" Margin="0,0,16,16" CornerRadius="16" BorderBrush="{StaticResource LineBrush}"
-                    BorderThickness="1" Background="{StaticResource SurfaceBrush}">
+            <Border Width="244" Height="196" Margin="0,0,16,16" CornerRadius="16" BorderBrush="{DynamicResource LineBrush}"
+                    BorderThickness="1" Background="{DynamicResource SurfaceBrush}">
               <Button Classes="card" Command="{Binding Create}">
                 <StackPanel Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center">
-                  <Border Width="52" Height="52" CornerRadius="26" Background="{StaticResource AccentSoftBrush}" HorizontalAlignment="Center">
-                    <PathIcon Data="{StaticResource IconAdd}" Width="24" Height="24" Foreground="{StaticResource AccentBrush}" />
+                  <Border Width="52" Height="52" CornerRadius="26" Background="{DynamicResource AccentSoftBrush}" HorizontalAlignment="Center">
+                    <PathIcon Data="{StaticResource IconAdd}" Width="24" Height="24" Foreground="{DynamicResource AccentBrush}" />
                   </Border>
                   <TextBlock Text="Create new notebook" FontSize="15" FontWeight="Medium" HorizontalAlignment="Center" />
                 </StackPanel>
@@ -37,15 +37,15 @@
             </Border>
           </DataTemplate>
           <DataTemplate DataType="vm:NotebookCardViewModel">
-            <Border Width="244" Height="196" Margin="0,0,16,16" CornerRadius="16" Background="{Binding Tint}">
+            <Border Width="244" Height="196" Margin="0,0,16,16" CornerRadius="16" Background="{DynamicResource NotebookCardBrush}">
               <Panel>
                 <Button Classes="card" Command="{Binding OpenCommand}" IsVisible="{Binding IsIdle}">
                   <DockPanel Margin="18">
-                    <TextBlock DockPanel.Dock="Top" Text="{Binding Emoji}" FontSize="34" />
+                    <TextBlock DockPanel.Dock="Top" Text="📘" FontSize="34" />
                     <StackPanel VerticalAlignment="Bottom" Spacing="6">
                       <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Medium" TextWrapping="Wrap" MaxLines="2"
                                  TextTrimming="CharacterEllipsis" />
-                      <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                      <TextBlock Text="{Binding Summary}" FontSize="12" Foreground="{DynamicResource MutedBrush}" />
                     </StackPanel>
                   </DockPanel>
                 </Button>
@@ -76,7 +76,7 @@
                 <StackPanel IsVisible="{Binding IsConfirmingDelete}" Spacing="12" Margin="18" VerticalAlignment="Center">
                   <TextBlock Text="{Binding DeletePrompt}" TextWrapping="Wrap" MaxLines="4" TextTrimming="CharacterEllipsis" FontSize="13" LineHeight="19" />
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Button Classes="pill" Height="32" Content="Delete" Foreground="{StaticResource DangerBrush}" Command="{Binding ConfirmDeleteCommand}" />
+                    <Button Classes="pill" Height="32" Content="Delete" Foreground="{DynamicResource DangerBrush}" Command="{Binding ConfirmDeleteCommand}" />
                     <Button Classes="pill" Height="32" Content="Cancel" Command="{Binding CancelCommand}" />
                   </StackPanel>
                 </StackPanel>

@@ -59,6 +59,9 @@ public sealed class DatabaseInitializer(SqliteConnectionFactory connections, IOp
 
         CREATE INDEX messages_conversation ON messages(conversation_id);
         """,
+        """
+        ALTER TABLE notebooks ADD COLUMN last_conversation_id TEXT REFERENCES conversations(id) ON DELETE SET NULL;
+        """,
     ];
 
     public void Initialize()

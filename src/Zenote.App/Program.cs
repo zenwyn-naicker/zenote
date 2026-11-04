@@ -68,6 +68,7 @@ public static class Program
     public static IServiceCollection AddZenoteViewModels(this IServiceCollection services) => services
         .AddSingleton<IFilePicker, AvaloniaFilePicker>()
         .AddSingleton<IExternalLauncher, ExternalLauncher>()
+        .AddSingleton<IAppearance, AvaloniaAppearance>()
         .AddSingleton<NotebooksViewModel>()
         .AddSingleton<SettingsViewModel>()
         .AddSingleton<ModelPickerViewModel>()
