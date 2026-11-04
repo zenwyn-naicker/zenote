@@ -25,6 +25,14 @@ Free, and everything stays on your Mac.</p>
 - **Pick up where you left off:** chats are saved, follow-up questions work, and any message copies in one click.
 - **Light or dark:** follows your Mac by default, or choose one in Settings.
 
+## See it in action
+
+![A tour of Zenote: setting up, creating a notebook, adding PDFs, asking questions, opening a cited page, and switching to dark mode](docs/screenshots/tour.gif)
+
+*Rendered from the app with real answers from `llama3.2`. The setup steps are simulated, waits are shortened, and the pointer is added.*
+
+## Screenshots
+
 | Your notebooks | When the answer isn't there |
 |---|---|
 | ![Notebook cards on the home screen](docs/screenshots/home.png) | ![Zenote saying it couldn't find an answer, with the closest matches](docs/screenshots/not-found.png) |
