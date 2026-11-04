@@ -24,6 +24,7 @@ public sealed class SystemCheck(
             new CheckResult("Ollama", ai.Reachable, ai.Reachable ? null : "Not running. Open Ollama from Applications."),
             ModelResult(model.ChatModel, ai),
             ModelResult(model.EmbeddingModel, ai),
+            CheckOllamaIsLocal(model.OllamaUrl),
             CheckSqliteVec(),
             await CheckPageRenderingAsync(ct),
         ];
@@ -35,6 +36,13 @@ public sealed class SystemCheck(
 
         // Without Ollama we can't tell whether a model is installed, so don't suggest pulling it.
         return new CheckResult(name, !missing, missing && ai.Reachable ? $"Run: ollama pull {name}" : null);
+    }
+
+    // Answers are only private if Ollama runs on this Mac, because it receives your documents' text.
+    private static CheckResult CheckOllamaIsLocal(string url)
+    {
+        var local = Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.IsLoopback;
+        return new CheckResult("Privacy", local, local ? null : "Ollama isn't on this Mac, so document text is sent to another computer.");
     }
 
     private static CheckResult CheckSqliteVec()

@@ -1,23 +1,90 @@
-# Zenote
+<p align="center">
+  <img src="assets/icon.png" width="96" alt="Zenote icon">
+</p>
 
-**Let your documents talk.** A simpler, cleaner, fully local take on NotebookLM for macOS.
+<h1 align="center">Zenote</h1>
 
-Group PDFs into notebooks, ask questions in plain language, and get streamed answers that cite the exact file and page. Everything runs on your Mac. Your documents never leave it, and it costs nothing to run.
+<p align="center"><strong>Let your documents talk.</strong><br>
+Ask your PDFs questions and get answers that show the exact page they came from.<br>
+Free, and everything stays on your Mac.</p>
 
-![Zenote showing an answer with citations beside the cited PDF page](docs/screenshot.png)
+<p align="center">
+  <a href="https://github.com/zenwyn-naicker/zenote/releases/latest/download/Zenote.dmg"><strong>Download for Mac</strong></a>
+</p>
 
-> A learning project, built to practise retrieval-augmented generation and clean .NET architecture.
+![Zenote answering questions, with the cited PDF page open beside the chat](docs/screenshots/citation.png)
+
 > Inspired by Google's NotebookLM; not affiliated with Google.
 
-## Features
+## What it does
 
-- **Notebooks**: each has its own sources and chats, and questions only search that notebook
-- **PDF import**: drag and drop, with per-document indexing progress, cancel and retry
-- **Streamed answers**: grounded only in your sources, and you can stop them at any time
-- **Clickable citations**: inline numbers and file-and-page chips open the rendered PDF page
-- **Honest "not found"**: when your sources don't cover a question, Zenote says so and shows the closest matches
-- **Saved conversations**: follow-up questions work, chats survive a restart, and any message copies in one click
-- **Scanned PDF warning**: image-only documents are flagged rather than silently failing
+- **Keep notebooks:** group PDFs by topic. Each notebook has its own sources and chats.
+- **Ask in plain language:** answers come only from your documents, and you can stop them at any time.
+- **Check every answer:** click a citation to see the exact PDF page it came from.
+- **Know when there's no answer:** if your documents don't cover something, Zenote says so and shows the closest pages.
+- **Pick up where you left off:** chats are saved, follow-up questions work, and any message copies in one click.
+
+| Your notebooks | When the answer isn't there | Simple settings |
+|---|---|---|
+| ![Notebook cards on the home screen](docs/screenshots/home.png) | ![Zenote saying it couldn't find an answer, with the closest matches](docs/screenshots/not-found.png) | ![The settings window](docs/screenshots/settings.png) |
+
+## Install Zenote
+
+You'll need a Mac with Apple Silicon (M1 or newer), about 5 GB of free space, and internet for the first setup. It takes about 10 minutes, mostly waiting for downloads. You won't need Terminal or an account.
+
+**1. Install Zenote**
+
+1. [Download Zenote.dmg](https://github.com/zenwyn-naicker/zenote/releases/latest/download/Zenote.dmg) and open it.
+2. Drag **Zenote** onto the **Applications** folder.
+
+**2. Open it for the first time**
+
+Zenote is a free project and isn't registered with Apple, so macOS blocks it the first time. You only need to do this once:
+
+1. Open Zenote from Applications. When macOS warns you, click **Done**.
+2. Open **System Settings**, then **Privacy & Security**.
+3. Scroll down to the message about Zenote and click **Open Anyway**.
+4. Enter your Mac password if asked, then click **Open Anyway** again.
+
+**3. Install Ollama**
+
+Ollama is the free app that runs the AI on your Mac, so your documents never leave it.
+
+1. Click **Open Ollama** in the yellow bar at the top of Zenote. If Ollama isn't installed yet, this opens its download page.
+2. Download Ollama, move it to Applications and open it. You don't need to sign in.
+3. Back in Zenote, click **Check again**.
+
+**4. Download the AI models**
+
+Click **Download models** in the yellow bar and wait for it to finish. It's a one-time download of about 2.3 GB.
+
+**5. Start asking**
+
+1. Click **Create new notebook**.
+2. Drag in a PDF, or click **Add sources**.
+3. When it's finished reading, ask a question about it.
+
+## If something goes wrong
+
+| What you see | What to do |
+|---|---|
+| Yellow bar says Zenote needs Ollama | Click **Open Ollama**. It needs to be running whenever you use Zenote, and you'll see its llama icon in the menu bar. |
+| "Looks scanned. Text search won't work." | The PDF is a picture of a page. Zenote can show it but can't read it. |
+| "I couldn't find this in your documents." | Try asking something more specific, or name the document in your question. |
+| The first answer is slow | The AI is loading. Later answers are quicker. |
+
+## Your privacy
+
+- Your PDFs and chats are stored only on your Mac, in a folder only your account can open.
+- The AI runs on your Mac through Ollama. Zenote has no accounts, tracking or analytics.
+- Zenote only connects to Ollama on your own Mac. The internet is only used to download Ollama and its models.
+- Models that run in the cloud are left out of the model list, so document text isn't sent to them. If Ollama is set up on another computer, Zenote warns you.
+
+Answers come from a small AI model and can be wrong, so check important ones against the cited page.
+
+---
+
+# For developers
 
 ## How it works
 
@@ -88,40 +155,33 @@ These documents are small and synthetic, and the fact check is a simple keyword 
 | Reranking and result merging | With page-sized chunks and 6 results, there's little left to gain. |
 | Audio overviews, study guides, mind maps | Zenote is the simple core: grounded chat with citations. |
 
-## Getting started
+## Build from source
 
-You'll need an Apple Silicon Mac, the [.NET 10 SDK](https://dotnet.microsoft.com/download) and [Ollama](https://ollama.com/download).
-
-```bash
-ollama pull llama3.2
-ollama pull nomic-embed-text
-```
-
-Make sure Ollama is running, then:
+You'll need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and [Ollama](https://ollama.com/download).
 
 ```bash
 dotnet run --project src/Zenote.App
 ```
 
-A banner appears at the top if anything needs attention, such as Ollama not running. To print a full check of Ollama, both models, sqlite-vec and page rendering without opening a window:
+To print a health check without opening a window:
 
 ```bash
 dotnet run --project src/Zenote.App -- --self-check
 ```
 
-To build `build/Zenote.app`:
+To build `build/Zenote.app` and the `build/Zenote.dmg` installer:
 
 ```bash
 ./scripts/package-macos.sh
 ```
 
-The app is ad-hoc signed rather than notarised, so macOS will warn about a downloaded copy. Right-click it and choose Open.
+The app is ad-hoc signed rather than notarised, because notarising needs a paid Apple Developer account. That's why macOS shows a warning on first launch.
 
 ## Configuration
 
-**Settings** (top right) switches the chat model between any you've pulled with Ollama, and shows the search model and Ollama connection. Defaults, including the Ollama address, live in `src/Zenote.App/appsettings.json`. Changing the embedding model there rebuilds the index on the next launch.
+**Settings** (top right) switches the chat model between any you've pulled with Ollama. Defaults, including the Ollama address, live in `src/Zenote.App/appsettings.json`. Changing the embedding model there rebuilds the index on the next launch.
 
-Your notebooks are stored in `~/Library/Application Support/Zenote`.
+Data is stored in `~/Library/Application Support/Zenote`. Unexpected errors are written to `errors.log` there.
 
 ## Keyboard shortcuts
 
@@ -131,6 +191,28 @@ Your notebooks are stored in `~/Library/Application Support/Zenote`.
 | ⌘N | New chat |
 | ⌘. | Stop the answer |
 | Return | Send |
+
+## Performance
+
+Measured on a 16 GB Apple Silicon MacBook Air.
+
+| Measure | Result |
+|---|---|
+| App start | 0.2 to 0.6 s |
+| Read a 500-page PDF | 0.8 s |
+| Index a 68-page PDF | About 5 s |
+| Search across 50,000 chunks | 49 ms |
+| First word of an answer (model loaded) | About 2 s |
+| Memory for both models | About 3.4 GB |
+
+## Security
+
+- SQL uses parameters. Text is only built into SQL from constants and numbers.
+- PDFs are treated as untrusted: files over 500 MB are refused, damaged files are rejected before they're stored, and the prompt tells the model to ignore instructions inside sources. A test PDF containing such an instruction was obeyed 0 times out of 5, though prompt rules alone can't guarantee this.
+- The model has no tools and can't take actions, so the worst a malicious PDF can do is mislead an answer.
+- Answers are shown as plain text, never as HTML.
+- The data folder is readable only by the current user.
+- Dependencies are checked with `dotnet list package --vulnerable --include-transitive`.
 
 ## Tests
 
@@ -153,7 +235,7 @@ ZENOTE_EVAL_ANSWERS=1 dotnet test --solution Zenote.slnx
 - Summaries only see the 6 passages retrieved, so they work best when the request names a document, and can miss parts of a long one
 - On broad questions small models tend to cite every source, including ones they didn't really use
 - Reading order on complex layouts depends on how the PDF was made
-- Small models can still make mistakes, so check the citations
+- Only tested on one 16 GB Mac so far
 
 ## Built with
 

@@ -19,11 +19,18 @@
 
   <DockPanel>
     <Border DockPanel.Dock="Top" IsVisible="{Binding HasProblems}" Background="#FEF7E0" Padding="20,8">
-      <DockPanel>
-        <Button DockPanel.Dock="Right" Classes="pill" Height="30" Content="Check again" Command="{Binding RefreshCommand}" />
-        <TextBlock Text="{Binding ProblemText}" FontSize="13" Foreground="#7A4F01" VerticalAlignment="Center"
-                   TextWrapping="Wrap" Margin="0,0,12,0" />
-      </DockPanel>
+      <StackPanel Spacing="6">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+            <Button Classes="pill primary" Height="30" Content="Open Ollama" Command="{Binding OpenOllamaCommand}" IsVisible="{Binding NeedsOllama}" />
+            <Button Classes="pill primary" Height="30" Content="Download models" Command="{Binding DownloadModelsCommand}" IsVisible="{Binding CanDownloadModels}" />
+            <Button Classes="pill" Height="30" Content="Check again" Command="{Binding RefreshCommand}" IsVisible="{Binding !IsDownloading}" />
+          </StackPanel>
+          <TextBlock Text="{Binding ProblemText}" FontSize="13" Foreground="#7A4F01" VerticalAlignment="Center"
+                     TextWrapping="Wrap" Margin="0,0,12,0" />
+        </DockPanel>
+        <ProgressBar Classes="thin" IsVisible="{Binding IsDownloading}" Value="{Binding DownloadPercent}" />
+      </StackPanel>
     </Border>
 
     <Panel>

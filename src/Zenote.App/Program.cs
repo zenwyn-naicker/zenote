@@ -15,6 +15,8 @@ namespace Zenote.App;
 
 public static class Program
 {
+    private const long MaxErrorLogBytes = 1024 * 1024;
+
     public static IServiceProvider Services { get; private set; } = null!;
 
     [STAThread]
@@ -65,6 +67,7 @@ public static class Program
 
     public static IServiceCollection AddZenoteViewModels(this IServiceCollection services) => services
         .AddSingleton<IFilePicker, AvaloniaFilePicker>()
+        .AddSingleton<IExternalLauncher, ExternalLauncher>()
         .AddSingleton<NotebooksViewModel>()
         .AddSingleton<SettingsViewModel>()
         .AddSingleton<ModelPickerViewModel>()
@@ -83,9 +86,14 @@ public static class Program
     // Keeps the app open after an unexpected error, and leaves a record of what went wrong.
     private static void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        File.AppendAllText(
-            Path.Combine(AppPaths.Default.Root, "errors.log"),
-            $"{DateTimeOffset.Now:O}{Environment.NewLine}{e.Exception}{Environment.NewLine}{Environment.NewLine}");
+        var log = new FileInfo(Path.Combine(AppPaths.Default.Root, "errors.log"));
+
+        if (log is { Exists: true, Length: > MaxErrorLogBytes })
+        {
+            log.Delete();
+        }
+
+        File.AppendAllText(log.FullName, $"{DateTimeOffset.Now:O}{Environment.NewLine}{e.Exception}{Environment.NewLine}{Environment.NewLine}");
 
         e.Handled = true;
     }

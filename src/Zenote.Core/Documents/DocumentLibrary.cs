@@ -11,8 +11,15 @@ public sealed class DocumentLibrary(
     IDocumentFileStore files,
     IIndexingQueue indexing) : IDocumentLibrary
 {
+    private const long MaxFileBytes = 500L * 1024 * 1024;
+
     public async Task<ImportResult> ImportAsync(Guid notebookId, string sourcePath, CancellationToken ct)
     {
+        if (new FileInfo(sourcePath).Length > MaxFileBytes)
+        {
+            throw new FileTooLargeException($"{Path.GetFileName(sourcePath)} is over the 500 MB limit.");
+        }
+
         var hash = await HashFileAsync(sourcePath, ct);
 
         if (await documents.FindByHashAsync(notebookId, hash, ct) is { } existing)

@@ -14,6 +14,31 @@ public sealed class DocumentLibraryTests : IDisposable
     public void Dispose() => _workspace.Dispose();
 
     [Fact]
+    public async Task Very_large_files_are_refused()
+    {
+        var notebook = await _workspace.Notebooks.CreateAsync("Work", _ct);
+        var path = _workspace.WriteFile("huge.pdf", []);
+        await using (var file = File.OpenWrite(path))
+        {
+            file.SetLength(501L * 1024 * 1024);
+        }
+
+        var ex = await Should.ThrowAsync<FileTooLargeException>(() => _workspace.Library.ImportAsync(notebook.Id, path, _ct));
+
+        ex.Message.ShouldContain("500 MB");
+    }
+
+    [Fact]
+    public void The_data_folder_is_private()
+    {
+        var paths = new Zenote.Infrastructure.Storage.AppPaths(Path.Combine(_workspace.Paths.Root, "private"));
+
+        paths.EnsurePrivateRoot();
+
+        File.GetUnixFileMode(paths.Root).ShouldBe(UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+    }
+
+    [Fact]
     public async Task Import_keeps_a_copy_that_outlives_the_original()
     {
         var notebook = await _workspace.Notebooks.CreateAsync("Work", _ct);

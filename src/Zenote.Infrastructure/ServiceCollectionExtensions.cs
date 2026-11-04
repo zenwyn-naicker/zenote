@@ -2,6 +2,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using OllamaSharp;
 using OllamaSharp.Models;
+using OllamaSharp.Models.Chat;
 using Zenote.Core.Abstractions;
 using Zenote.Core.Answering;
 using Zenote.Core.Chunking;
@@ -19,18 +20,21 @@ namespace Zenote.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
+    private const string ModelKeepAlive = "30m";
+
     public static IServiceCollection AddZenoteInfrastructure(this IServiceCollection services, ModelOptions options, AppPaths paths)
     {
         var url = new Uri(options.OllamaUrl);
 
-        Directory.CreateDirectory(paths.Root);
+        paths.EnsurePrivateRoot();
 
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(options));
-        services.AddSingleton<IOllamaApiClient>(_ => new OllamaApiClient(url));
+        services.AddSingleton<IOllamaApiClient>(_ => CreateClient(url));
         services.AddSingleton(_ => new SwitchableChatClient(model => CreateChatClient(url, options, model), options.ChatModel));
         services.AddSingleton<IChatClient>(provider => provider.GetRequiredService<SwitchableChatClient>());
         services.AddSingleton<IChatModels, OllamaChatModels>();
-        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(url, options.EmbeddingModel));
+        services.AddSingleton<IModelInstaller, OllamaModelInstaller>();
+        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => CreateClient(url, options.EmbeddingModel));
         services.AddSingleton<IAiHealthCheck, OllamaHealthCheck>();
         services.AddSingleton(paths);
         services.AddSingleton(new SqliteConnectionFactory(paths.DatabasePath));
@@ -59,9 +63,18 @@ public static class ServiceCollectionExtensions
     // Ollama silently cuts off prompts longer than its context window, so it's always set explicitly.
     // Keeping this here means Core never needs to know about Ollama.
     public static IChatClient CreateChatClient(Uri url, ModelOptions options, string model) =>
-        new ChatClientBuilder(new OllamaApiClient(url, model))
-            .ConfigureOptions(chat => chat
-                .AddOllamaOption(OllamaOption.NumCtx, options.ChatContextTokens)
-                .AddOllamaOption(OllamaOption.Think, false))
+        new ChatClientBuilder(CreateClient(url, model))
+            .ConfigureOptions(chat =>
+            {
+                chat.AddOllamaOption(OllamaOption.NumCtx, options.ChatContextTokens)
+                    .AddOllamaOption(OllamaOption.Think, false);
+
+                // Reloading a model takes seconds, so it stays loaded between questions.
+                chat.RawRepresentationFactory = _ => new ChatRequest { KeepAlive = ModelKeepAlive };
+            })
             .Build();
+
+    // A slow Mac can take minutes to answer, and model downloads take far longer, so requests never time out.
+    private static OllamaApiClient CreateClient(Uri url, string model = "") =>
+        new(new HttpClient { BaseAddress = url, Timeout = System.Threading.Timeout.InfiniteTimeSpan }, model);
 }
